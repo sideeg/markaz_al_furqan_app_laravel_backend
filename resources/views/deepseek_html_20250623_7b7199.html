@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة تحكم الإدارة - مركز الفرقان</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Cairo Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2c6e49;
+            --secondary: #4c956c;
+            --accent: #fefee3;
+            --light: #d8f3dc;
+            --dark: #1b4332;
+        }
+        
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #f8f9fa;
+            direction: rtl;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card-icon {
+            font-size: 2.5rem;
+            opacity: 0.2;
+            position: absolute;
+            right: 20px;
+            bottom: 20px;
+        }
+        
+        .stats-card {
+            border-left: 4px solid var(--primary);
+        }
+        
+        .stats-card.students {
+            border-left-color: #2a9d8f;
+        }
+        
+        .stats-card.courses {
+            border-left-color: #e9c46a;
+        }
+        
+        .stats-card.sheikhs {
+            border-left-color: #f4a261;
+        }
+        
+        .stats-card.active {
+            border-left-color: #e76f51;
+        }
+        
+        .dashboard-header {
+            background: linear-gradient(120deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            border-radius: 0 0 10px 10px;
+        }
+        
+        .quick-actions .btn {
+            width: 100%;
+            margin-bottom: 10px;
+            text-align: right;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .quick-actions .btn i {
+            margin-left: 10px;
+        }
+        
+        .table th {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .badge-online {
+            background-color: #2a9d8f;
+        }
+        
+        .badge-open {
+            background-color: #e9c46a;
+        }
+        
+        .badge-closed {
+            background-color: #e76f51;
+        }
+        
+        .star-rating {
+            color: #ffc107;
+        }
+        
+        .section-title {
+            border-right: 4px solid var(--primary);
+            padding-right: 15px;
+            margin-bottom: 20px;
+            color: var(--dark);
+        }
+        
+        .notification-item {
+            border-right: 3px solid #dee2e6;
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .notification-item:hover {
+            background-color: #f8f9fa;
+            border-right-color: var(--primary);
+        }
+        
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            left: -5px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Dashboard Layout -->
+    <div class="container-fluid">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <div class="container">
+                <h1 class="text-center mb-0"><i class="fas fa-mosque me-2"></i>لوحة تحكم الإدارة - مركز الفرقان</h1>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="container">
+            <!-- Stats Cards -->
+            <div class="row mb-4">
+                <div class="col-md-3 col-sm-6">
+                    <div class="card stats-card students">
+                        <div class="card-body position-relative">
+                            <h5 class="card-title text-muted">إجمالي الطلاب</h5>
+                            <h2 class="card-text">1,245</h2>
+                            <p class="text-success"><i class="fas fa-arrow-up"></i> 12.5% زيادة</p>
+                            <i class="fas fa-users card-icon"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-3 col-sm-6">
+                    <div class="card stats-card courses">
+                        <div class="card-body position-relative">
+                            <h5 class="card-title text-muted">إجمالي الدورات</h5>
+                            <h2 class="card-text">86</h2>
+                            <p class="text-success"><i class="fas fa-arrow-up"></i> 3.2% زيادة</p>
+                            <i class="fas fa-book card-icon"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-3 col-sm-6">
+                    <div class="card stats-card sheikhs">
+                        <div class="card-body position-relative">
+                            <h5 class="card-title text-muted">إجمالي المشايخ</h5>
+                            <h2 class="card-text">32</h2>
+                            <p class="text-success"><i class="fas fa-arrow-up"></i> 5.6% زيادة</p>
+                            <i class="fas fa-user-tie card-icon"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-3 col-sm-6">
+                    <div class="card stats-card active">
+                        <div class="card-body position-relative">
+                            <h5 class="card-title text-muted">الدورات النشطة</h5>
+                            <h2 class="card-text">24</h2>
+                            <p class="text-danger"><i class="fas fa-arrow-down"></i> 2.1% انخفاض</p>
+                            <i class="fas fa-book-open card-icon"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recent Courses & Recent Activity -->
+            <div class="row mb-4">
+                <!-- Recent Courses -->
+                <div class="col-lg-8">
+                    <div class="card">
+                        <div class="card-body">
+                            <h3 class="section-title">الدورات الحديثة</h3>
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>اسم الدورة</th>
+                                            <th>النوع</th>
+                                            <th>حالة التسجيل</th>
+                                            <th>تاريخ البدء</th>
+                                            <th>الإجراءات</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>حفظ الجزء الثلاثين - المستوى الأول</td>
+                                            <td><span class="badge badge-online bg-success">أونلاين</span></td>
+                                            <td><span class="badge bg-success">مفتوح</span></td>
+                                            <td>15/09/2023</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i> عرض</button>
+                                                <button class="btn btn-sm btn-outline-secondary"><i class="fas fa-edit"></i> تعديل</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>تلاوة وتجويد - المستوى المتقدم</td>
+                                            <td><span class="badge badge-open bg-warning">مفتوح</span></td>
+                                            <td><span class="badge bg-warning">محدود</span></td>
+                                            <td>20/09/2023</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i> عرض</button>
+                                                <button class="btn btn-sm btn-outline-secondary"><i class="fas fa-edit"></i> تعديل</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>مراجعة الحفظ - المجموعة الثالثة</td>
+                                            <td><span class="badge badge-closed bg-danger">مغلق</span></td>
+                                            <td><span class="badge bg-danger">مغلق</span></td>
+                                            <td>05/09/2023</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i> عرض</button>
+                                                <button class="btn btn-sm btn-outline-secondary"><i class="fas fa-edit"></i> تعديل</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>أحكام التلاوة للمبتدئين</td>
+                                            <td><span class="badge badge-online bg-success">أونلاين</span></td>
+                                            <td><span class="badge bg-success">مفتوح</span></td>
+                                            <td>25/09/2023</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i> عرض</button>
+                                                <button class="btn btn-sm btn-outline-secondary"><i class="fas fa-edit"></i> تعديل</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>حفظ الجزء التاسع والعشرون</td>
+                                            <td><span class="badge badge-open bg-warning">مفتوح</span></td>
+                                            <td><span class="badge bg-warning">محدود</span></td>
+                                            <td>12/10/2023</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i> عرض</button>
+                                                <button class="btn btn-sm btn-outline-secondary"><i class="fas fa-edit"></i> تعديل</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Recent Hifz Activity -->
+                    <div class="card mt-4">
+                        <div class="card-body">
+                            <h3 class="section-title">نشاط الحفظ الحديث</h3>
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>اسم الطالب</th>
+                                            <th>اسم الشيخ</th>
+                                            <th>التاريخ</th>
+                                            <th>التقييم</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>محمد أحمد</td>
+                                            <td>الشيخ خالد</td>
+                                            <td>15/09/2023</td>
+                                            <td><span class="star-rating">★★★★☆</span> (4/5)</td>
+                                        </tr>
+                                        <tr>
+                                            <td>فاطمة عبد الله</td>
+                                            <td>الشيخ عبد الرحمن</td>
+                                            <td>14/09/2023</td>
+                                            <td><span class="star-rating">★★★★★</span> (5/5)</td>
+                                        </tr>
+                                        <tr>
+                                            <td>عمر خالد</td>
+                                            <td>الشيخ محمد</td>
+                                            <td>14/09/2023</td>
+                                            <td><span class="star-rating">★★★☆☆</span> (3/5)</td>
+                                        </tr>
+                                        <tr>
+                                            <td>سارة محمد</td>
+                                            <td>الشيخ يوسف</td>
+                                            <td>13/09/2023</td>
+                                            <td><span class="star-rating">★★★★☆</span> (4/5)</td>
+                                        </tr>
+                                        <tr>
+                                            <td>ياسر علي</td>
+                                            <td>الشيخ أحمد</td>
+                                            <td>12/09/2023</td>
+                                            <td><span class="star-rating">★★★★★</span> (5/5)</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quick Actions & Notifications -->
+                <div class="col-lg-4">
+                    <!-- Quick Actions -->
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h3 class="section-title">إجراءات سريعة</h3>
+                            <div class="quick-actions">
+                                <button class="btn btn-primary">
+                                    <i class="fas fa-plus"></i> إضافة دورة جديدة
+                                </button>
+                                <button class="btn btn-success">
+                                    <i class="fas fa-user-plus"></i> إضافة شيخ جديد
+                                </button>
+                                <button class="btn btn-info">
+                                    <i class="fas fa-bell"></i> إرسال إشعار
+                                </button>
+                                <button class="btn btn-warning">
+                                    <i class="fas fa-file-export"></i> تصدير التقارير
+                                </button>
+                                <button class="btn btn-danger">
+                                    <i class="fas fa-cog"></i> إعدادات النظام
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Notifications Log -->
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h3 class="section-title mb-0">سجل الإشعارات</h3>
+                                <span class="badge bg-primary position-relative">
+                                    5 جديد
+                                    <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle">
+                                        <span class="visually-hidden">إشعارات جديدة</span>
+                                    </span>
+                                </span>
+                            </div>
+                            
+                            <div class="notification-list">
+                                <div class="notification-item position-relative">
+                                    <div class="d-flex justify-content-between">
+                                        <strong>بداية دورة جديدة</strong>
+                                        <small class="text-muted">منذ 2 ساعة</small>
+                                    </div>
+                                    <p class="mb-0">تم إطلاق دورة حفظ الجزء الثلاثين</p>
+                                    <span class="badge bg-primary">الطلاب</span>
+                                </div>
+                                
+                                <div class="notification-item position-relative">
+                                    <div class="d-flex justify-content-between">
+                                        <strong>تحديد موعد اختبار</strong>
+                                        <small class="text-muted">منذ 5 ساعات</small>
+                                    </div>
+                                    <p class="mb-0">اختبار نهاية الفصل الأول يوم السبت</p>
+                                    <span class="badge bg-info">الجميع</span>
+                                </div>
+                                
+                                <div class="notification-item position-relative">
+                                    <div class="d-flex justify-content-between">
+                                        <strong>اجتماع المشايخ</strong>
+                                        <small class="text-muted">منذ يوم واحد</small>
+                                    </div>
+                                    <p class="mb-0">اجتماع شهري لمدرسي الحفظ يوم الأربعاء</p>
+                                    <span class="badge bg-success">المشايخ</span>
+                                </div>
+                                
+                                <div class="notification-item position-relative">
+                                    <div class="d-flex justify-content-between">
+                                        <strong>تحديث المنهج</strong>
+                                        <small class="text-muted">منذ يومين</small>
+                                    </div>
+                                    <p class="mb-0">تم تحديث منهج المرحلة المتوسطة</p>
+                                    <span class="badge bg-warning">المدرسين</span>
+                                </div>
+                                
+                                <div class="notification-item position-relative">
+                                    <div class="d-flex justify-content-between">
+                                        <strong>إجازة عيد الأضحى</strong>
+                                        <small class="text-muted">منذ 4 أيام</small>
+                                    </div>
+                                    <p class="mb-0">إجازة من 10 إلى 15 ذو الحجة</p>
+                                    <span class="badge bg-info">الجميع</span>
+                                </div>
+                            </div>
+                            
+                            <div class="text-center mt-3">
+                                <a href="#" class="btn btn-outline-primary">عرض جميع الإشعارات</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap & jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Simple script to handle active states
+        $(document).ready(function() {
+            // Add active class to nav items
+            $('.nav-link').on('click', function() {
+                $('.nav-link').removeClass('active');
+                $(this).addClass('active');
+            });
+            
+            // Mark notifications as read
+            $('.notification-item').on('click', function() {
+                $(this).toggleClass('bg-light');
+            });
+        });
+    </script>
+</body>
+</html>
