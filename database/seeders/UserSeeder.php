@@ -18,11 +18,22 @@ class UserSeeder extends Seeder
          // Create admin user
          $admin = User::create([
             'name' => 'Admin User',
-            'email' => 'sideeg@markaz.com',
+            'email' => 'admin@markaz.com',
             'password' => Hash::make('123456'), // Change this password
             'phone' => '+966500000000',
             'national_id' => '1111111111',
-            'qiraat' => 'Hafs',
+            // 'qiraat' => 'Hafs',
+            'is_active' => true,
+            'email_verified_at' => now(),
+        ]);
+
+        $admin2 = User::create([
+            'name' => 'Osama Alsir',
+            'email' => 'osama@markaz.com',
+            'password' => Hash::make('123456'), // Change this password
+            'phone' => '+96650454533',
+            'national_id' => '1112211111',
+            // 'qiraat' => 'Hafs',
             'is_active' => true,
             'email_verified_at' => now(),
         ]);
@@ -32,8 +43,9 @@ class UserSeeder extends Seeder
         
         // Assign role to user
         $admin->assignRole($adminRole);
+        $admin2->assignRole($adminRole);
         
         // Optional: Create additional users
-        User::factory()->count(10)->create(); 
+        // User::factory()->count(10)->create(); 
     }
 }

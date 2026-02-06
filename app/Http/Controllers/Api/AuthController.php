@@ -212,6 +212,8 @@ class AuthController extends Controller
             ]);
 
             $user = $request->user();
+            Log::info($user);
+            Log::info($request);
 
             if (!Hash::check($request->current_password, $user->password)) {
                 return response()->json([

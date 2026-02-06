@@ -29,12 +29,12 @@ class DatabaseSeeder extends Seeder
         
         $this->call([
             UserSeeder::class,
-            StudentSeeder::class,
-            SheikhSeeder::class,
-            CourseSeeder::class,
-            HifzLogSeeder::class,
-            ReviewLogSeeder::class,
-            NotificationSeeder::class,
+            // StudentSeeder::class,
+            // SheikhSeeder::class,
+            // CourseSeeder::class,
+            // HifzLogSeeder::class,
+            // ReviewLogSeeder::class,
+            // NotificationSeeder::class,
         ]);
         
 
