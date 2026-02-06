@@ -4,6 +4,20 @@
 
 This is the Laravel backend API for the Markaz Al-Furqan Quran memorization application. It provides a comprehensive RESTful API for managing users, courses, enrollments, hifz logs, and notifications.
 
+## Screenshots
+
+### Login
+
+![Login Screen](screenshots/login.png)
+
+### Dashboard
+
+![Dashboard](screenshots/dashboard.png)
+
+### Progress Tracking
+
+![Progress](screenshots/mangment.png)
+
 ## Features
 
 ### Authentication & Authorization
@@ -269,13 +283,6 @@ SANCTUM_STATEFUL_DOMAINS=localhost,127.0.0.1,your-domain.com
 
 ## Performance Optimization
 
-### Database
-
--   Proper indexing on frequently queried columns
--   Eager loading to prevent N+1 queries
--   Database query optimization
--   Pagination for large datasets
-
 ### Caching
 
 -   Model caching for static data
@@ -289,20 +296,6 @@ SANCTUM_STATEFUL_DOMAINS=localhost,127.0.0.1,your-domain.com
 -   Efficient JSON serialization
 -   Minimal data transfer
 -   Optimized database queries
-
-## Screenshots
-
-### Login
-
-![Login Screen](screenshots/login.png)
-
-### Dashboard
-
-![Dashboard](screenshots/dashboard.png)
-
-### Progress Tracking
-
-![Progress](screenshots/mangment.png)
 
 ## Deployment
 

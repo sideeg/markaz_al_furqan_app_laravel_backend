@@ -12,25 +12,25 @@ class HifzController extends Controller
 {
     public function myLogs(Request $request)
     {
-        $logs = HifzLog::where('user_id', auth()->user()->id)
-            ->orderBy('date', 'desc')
+        $logs = HifzLog::where('student_id', auth()->user()->id)
+            ->orderBy('session_date', 'desc')
             ->get();
         return response()->json($logs);
     }
 
     public function myLogsByCourse(Request $request, Course $course)
     {
-        $logs = HifzLog::where('user_id', auth()->user()->id)
+        $logs = HifzLog::where('student_id', auth()->user()->id)
             ->where('course_id', $course->id)
-            ->orderBy('date', 'desc')
+            ->orderBy('session_date', 'desc')
             ->get();
         return response()->json($logs);
     }
 
     public function myProgress(Request $request)
     {
-        $progress = HifzLog::where('user_id', auth()->user()->id)
-            ->selectRaw('course_id, sum(pages) as pages')
+        $progress = HifzLog::where('student_id', auth()->user()->id)
+            
             ->groupBy('course_id')
             ->get();
         return response()->json($progress);
@@ -40,7 +40,7 @@ class HifzController extends Controller
 {
     $userId = auth()->user()->id;
 
-    $statistics = HifzLog::where('user_id', $userId)
+    $statistics = HifzLog::where('student_id', $userId)
         ->selectRaw('
             count(*) as count,
             avg(CASE 
