@@ -37,6 +37,16 @@ class UserSeeder extends Seeder
             'is_active' => true,
             'email_verified_at' => now(),
         ]);
+        $admin2 = User::create([
+            'name' => 'Amed yahia',
+            'email' => 'a7med3632@gmail.com',
+            'password' => Hash::make('112233445566'), // Change this password
+            'phone' => '+96650454533',
+            'national_id' => '1112211111',
+            // 'qiraat' => 'Hafs',
+            'is_active' => true,
+            'email_verified_at' => now(),
+        ]);
 
         // Create or get 'admin' role
         $adminRole = Role::firstOrCreate(['name' => 'admin']);
