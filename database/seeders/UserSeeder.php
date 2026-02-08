@@ -37,7 +37,7 @@ class UserSeeder extends Seeder
             'is_active' => true,
             'email_verified_at' => now(),
         ]);
-        $admin2 = User::create([
+        $admin3 = User::create([
             'name' => 'Amed yahia',
             'email' => 'a7med3632@gmail.com',
             'password' => Hash::make('112233445566'), // Change this password
@@ -54,6 +54,7 @@ class UserSeeder extends Seeder
         // Assign role to user
         $admin->assignRole($adminRole);
         $admin2->assignRole($adminRole);
+        $admin3->assignRole($adminRole);
         
         // Optional: Create additional users
         // User::factory()->count(10)->create(); 
