@@ -79,6 +79,9 @@
             border-right-color: #e76f51;
         }
         
+        /* ============================================
+           DASHBOARD HEADER STYLES
+        ============================================ */
         .dashboard-header {
             background: linear-gradient(120deg, var(--primary), var(--dark));
             color: white;
@@ -102,6 +105,100 @@
             z-index: 0;
         }
         
+        .header-content {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .logo-container {
+            background-color: white;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            flex-shrink: 0;
+        }
+        
+        .logo-text {
+            font-weight: 800;
+            font-size: 1.8rem;
+            color: var(--primary);
+        }
+        
+        .header-content h1 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header-content h1 i {
+            margin-left: 8px;
+        }
+        
+        .welcome-text {
+            color: rgba(255,255,255,0.85);
+            font-size: 1rem;
+        }
+        
+        .date-badge {
+            background-color: rgba(255,255,255,0.15);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            display: inline-block;
+        }
+        
+        /* ============================================
+           NAVIGATION BUTTONS - FLEXIBLE DESIGN
+        ============================================ */
+        .navigation-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .nav-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.7rem 1.2rem;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(5px);
+            color: white;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-decoration: none;
+            white-space: nowrap;
+            font-size: clamp(0.85rem, 2vw, 1rem);
+            min-height: 44px; /* Touch-friendly minimum */
+        }
+        
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-3px);
+            color: white;
+        }
+        
+        .nav-btn i {
+            margin-left: 0.5rem;
+            font-size: clamp(1.1rem, 2.5vw, 1.3rem);
+            flex-shrink: 0;
+        }
+        
+        .nav-btn-text {
+            display: inline;
+        }
+        
+        /* Other Styles */
         .quick-actions .btn {
             width: 100%;
             margin-bottom: 15px;
@@ -156,6 +253,7 @@
             font-weight: 700;
             display: flex;
             align-items: center;
+            font-size: 1.2rem;
         }
         
         .section-title i {
@@ -224,71 +322,6 @@
             font-size: 0.9rem;
         }
         
-        .logo-container {
-            background-color: white;
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-            margin-left: 20px;
-        }
-        
-        .logo-text {
-            font-weight: 800;
-            font-size: 1.8rem;
-            color: var(--primary);
-        }
-        
-        .header-content {
-            display: flex;
-            align-items: center;
-        }
-        
-        .welcome-text {
-            color: rgba(255,255,255,0.85);
-        }
-        
-        .date-badge {
-            background-color: rgba(255,255,255,0.15);
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-weight: 600;
-        }
-        
-        .navigation-buttons {
-            display: flex;
-            gap: 15px;
-            margin-top: 15px;
-        }
-        
-        .nav-btn {
-            display: flex;
-            align-items: center;
-            padding: 10px 20px;
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(5px);
-            color: white;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        
-        .nav-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: translateY(-3px);
-            text-decoration: none;
-        }
-        
-        .nav-btn i {
-            margin-left: 8px;
-            font-size: 1.2rem;
-        }
-        
         .section-header {
             display: flex;
             justify-content: space-between;
@@ -302,16 +335,347 @@
             color: var(--primary);
             font-weight: 600;
             transition: all 0.3s ease;
+            text-decoration: none;
         }
         
         .view-all-btn:hover {
             color: var(--dark);
-            text-decoration: none;
             transform: translateX(-5px);
         }
         
         .view-all-btn i {
             margin-right: 5px;
+        }
+        
+        /* ============================================
+           RESPONSIVE STYLES
+        ============================================ */
+        
+        /* Tablet Breakpoint */
+        @media (max-width: 1024px) {
+            .dashboard-header {
+                padding: 20px 0;
+            }
+            
+            .header-content h1 {
+                font-size: 1.5rem;
+            }
+            
+            .nav-btn {
+                padding: 0.6rem 1rem;
+            }
+            
+            .stats-number {
+                font-size: 2rem;
+            }
+        }
+        
+        /* Small Tablet / Large Mobile */
+        @media (max-width: 768px) {
+            .dashboard-header {
+                padding: 15px 0;
+                margin-bottom: 20px;
+            }
+            
+            .dashboard-header::before {
+                font-size: 8rem;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .logo-container {
+                width: 60px;
+                height: 60px;
+                align-self: center;
+            }
+            
+            .logo-text {
+                font-size: 1.4rem;
+            }
+            
+            .header-content h1 {
+                font-size: 1.3rem;
+                text-align: center;
+                width: 100%;
+            }
+            
+            .welcome-text {
+                font-size: 0.9rem;
+                text-align: center;
+                width: 100%;
+            }
+            
+            .date-badge {
+                padding: 4px 12px;
+                font-size: 0.85rem;
+            }
+            
+            .navigation-buttons {
+                width: 100%;
+                justify-content: center;
+                gap: 10px;
+            }
+            
+            .nav-btn {
+                flex: 1 1 auto;
+                min-width: 120px;
+                padding: 0.6rem 0.9rem;
+            }
+            
+            .nav-btn i {
+                font-size: clamp(1.2rem, 3vw, 1.4rem);
+            }
+            
+            /* Stats Cards */
+            .stats-number {
+                font-size: 1.8rem;
+            }
+            
+            .stats-label {
+                font-size: 0.9rem;
+            }
+            
+            .stats-change {
+                font-size: 0.85rem;
+            }
+            
+            .card-icon {
+                font-size: 2rem;
+            }
+            
+            /* Section Titles */
+            .section-title {
+                font-size: 1rem;
+            }
+            
+            .section-title i {
+                width: 30px;
+                height: 30px;
+            }
+            
+            /* Quick Actions */
+            .quick-actions .btn {
+                padding: 10px 15px;
+                font-size: 0.9rem;
+            }
+            
+            /* Tables */
+            .table {
+                font-size: 0.85rem;
+            }
+            
+            .action-btn {
+                padding: 4px 8px;
+                font-size: 0.8rem;
+            }
+        }
+        
+        /* Mobile Devices */
+        @media (max-width: 576px) {
+            .dashboard-container {
+                padding: 0;
+            }
+            
+            .dashboard-header {
+                padding: 12px 0;
+                margin-bottom: 15px;
+                border-radius: 0 0 15px 15px;
+            }
+            
+            .dashboard-header::before {
+                font-size: 5rem;
+            }
+            
+            .logo-container {
+                width: 55px;
+                height: 55px;
+            }
+            
+            .logo-text {
+                font-size: 1.3rem;
+            }
+            
+            .header-content h1 {
+                font-size: 1.1rem;
+            }
+            
+            .header-content h1 i {
+                font-size: 1rem;
+            }
+            
+            .welcome-text {
+                font-size: 0.85rem;
+            }
+            
+            .welcome-text strong {
+                display: block;
+                margin-top: 3px;
+            }
+            
+            .date-badge {
+                padding: 3px 10px;
+                font-size: 0.75rem;
+                display: block;
+                text-align: center;
+                margin-top: 5px;
+            }
+            
+            /* IMPROVED NAVIGATION BUTTONS FOR MOBILE */
+            .navigation-buttons {
+                gap: 8px;
+                margin-top: 10px;
+            }
+            
+            .nav-btn {
+                flex: 1 1 calc(50% - 4px); /* Two buttons per row */
+                min-width: 0;
+                padding: 0.65rem 0.5rem;
+                font-size: 0.8rem;
+            }
+            
+            .nav-btn i {
+                font-size: 1.3rem;
+                margin-left: 0.4rem;
+            }
+            
+            .nav-btn-text {
+                font-size: 0.8rem;
+            }
+            
+            /* Stats Cards - Stack on mobile */
+            .stats-card {
+                margin-bottom: 15px;
+            }
+            
+            .stats-number {
+                font-size: 1.6rem;
+            }
+            
+            .stats-label {
+                font-size: 0.85rem;
+            }
+            
+            .stats-change {
+                font-size: 0.75rem;
+            }
+            
+            .view-all-btn {
+                font-size: 0.8rem;
+            }
+            
+            /* Card Padding */
+            .card-body {
+                padding: 15px;
+            }
+            
+            /* Section Headers */
+            .section-title {
+                font-size: 0.95rem;
+                padding-right: 10px;
+            }
+            
+            .section-title i {
+                width: 28px;
+                height: 28px;
+                font-size: 0.9rem;
+            }
+            
+            /* Quick Actions */
+            .quick-actions .btn {
+                padding: 8px 12px;
+                font-size: 0.85rem;
+                margin-bottom: 10px;
+            }
+            
+            .quick-actions .btn i {
+                font-size: 1rem;
+            }
+            
+            /* Tables - Make responsive */
+            .table-responsive {
+                font-size: 0.75rem;
+            }
+            
+            .table th,
+            .table td {
+                padding: 8px 5px;
+                font-size: 0.75rem;
+            }
+            
+            .action-btn {
+                padding: 3px 6px;
+                font-size: 0.7rem;
+            }
+            
+            /* Notification Items */
+            .notification-item {
+                padding: 10px 12px;
+                font-size: 0.85rem;
+            }
+            
+            /* Container Padding */
+            .container {
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+        }
+        
+        /* Extra Small Devices */
+        @media (max-width: 375px) {
+            .header-content h1 {
+                font-size: 1rem;
+            }
+            
+            .welcome-text {
+                font-size: 0.75rem;
+            }
+            
+            .navigation-buttons {
+                gap: 6px;
+            }
+            
+            .nav-btn {
+                padding: 0.55rem 0.4rem;
+                font-size: 0.75rem;
+            }
+            
+            .nav-btn i {
+                font-size: 1.2rem;
+                margin-left: 0.3rem;
+            }
+            
+            .nav-btn-text {
+                font-size: 0.75rem;
+            }
+            
+            .stats-number {
+                font-size: 1.4rem;
+            }
+            
+            .section-title {
+                font-size: 0.9rem;
+            }
+        }
+        
+        /* Very Small Screens - Icon Only Mode */
+        @media (max-width: 340px) {
+            .nav-btn {
+                flex: 1 1 calc(33.333% - 4px); /* Three icons per row */
+                padding: 0.6rem 0.3rem;
+            }
+            
+            .nav-btn-text {
+                display: none; /* Hide text on very small screens */
+            }
+            
+            .nav-btn i {
+                margin-left: 0;
+                font-size: 1.4rem;
+            }
         }
     </style>
 </head>
@@ -332,19 +696,24 @@
                         <!-- Navigation Buttons -->
                         <div class="navigation-buttons">
                             <a href="{{ route('admin.courses.index') }}" class="nav-btn">
-                                <i class="fas fa-book"></i> جميع الدورات
+                                <i class="fas fa-book"></i>
+                                <span class="nav-btn-text">جميع الدورات</span>
                             </a>
                             <a href="{{ route('admin.students.index') }}" class="nav-btn">
-                                <i class="fas fa-users"></i> جميع الطلاب
+                                <i class="fas fa-users"></i>
+                                <span class="nav-btn-text">جميع الطلاب</span>
                             </a>
                             <a href="{{ route('admin.sheikhs.index') }}" class="nav-btn">
-                                <i class="fas fa-user-tie"></i> جميع المشايخ
+                                <i class="fas fa-user-tie"></i>
+                                <span class="nav-btn-text">جميع المشايخ</span>
                             </a>
                         </div>
                     </div>
                 </div>
             </div>
         </header>
+        
+        <!-- Rest of your content stays the same -->
 
         <!-- Main Content -->
         <div class="container pb-5">
@@ -357,7 +726,7 @@
                             <p class="stats-number">{{ $stats['studentsCount']['count'] ?? 0 }}</p>
                             <div class="d-flex justify-content-between align-items-center">
                                 <p class="stats-change text-success mb-0"><i class="fas fa-arrow-up"></i> {{ $stats['studentsCount']['growth'] ?? 0 }} زيادة</p>
-                                <a href="admin.students.index" class="view-all-btn">عرض الكل <i class="fas fa-arrow-left"></i></a>
+                                <a href="{{ route('admin.students.index') }}" class="view-all-btn">عرض الكل <i class="fas fa-arrow-left"></i></a>
                             </div>
                             <i class="fas fa-users card-icon"></i>
                         </div>
@@ -371,7 +740,7 @@
                             <p class="stats-number">{{ $stats['coursesCount']['count'] ?? 0 }}</p>
                             <div class="d-flex justify-content-between align-items-center">
                                 <p class="stats-change text-success mb-0"><i class="fas fa-arrow-up"></i>{{ $stats['coursesCount']['growth'] ?? 0 }} زيادة</p>
-                                <a href={{ route('admin.courses.index') }} target="" class="view-all-btn">عرض الكل <i class="fas fa-arrow-left"></i></a>
+                                <a href="{{ route('admin.courses.index') }}" class="view-all-btn">عرض الكل <i class="fas fa-arrow-left"></i></a>
                             </div>
                             <i class="fas fa-book card-icon"></i>
                         </div>
@@ -749,7 +1118,8 @@
 
 
 <!-- Admin Modal -->
-<div class="modal fade @if($errors->hasBag('admin')) show d-block @endif" id="addAdminModal" tabindex="-1" aria-labelledby="addAdminModalLabel" aria-hidden="true">
+<div class="modal fade @if($errors->hasBag('admin')) show d-block @endif" 
+     id="addAdminModal" tabindex="-1" aria-labelledby="addAdminModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <form method="POST" action="{{ route('admin.admins.store') }}">
       @csrf
@@ -759,18 +1129,42 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          @if($errors->admin->any())
+          @if($errors->hasBag('admin') && $errors->admin->any())
             <div class="alert alert-danger">
-              <ul>
+              <ul class="mb-0">
                 @foreach ($errors->admin->all() as $error)
                   <li>{{ $error }}</li>
                 @endforeach
               </ul>
             </div>
           @endif
-          <input type="text" name="name" class="form-control mb-2" placeholder="الاسم الكامل" value="{{ old('name') }}" required>
-          <input type="email" name="email" class="form-control mb-2" placeholder="البريد الإلكتروني" value="{{ old('email') }}" required>
-          <input type="password" name="password" class="form-control mb-2" placeholder="كلمة المرور" required>
+          
+          <input type="text" name="name" 
+                 class="form-control mb-2 @error('name', 'admin') is-invalid @enderror" 
+                 placeholder="الاسم الكامل" 
+                 value="{{ old('name') }}" required>
+          @error('name', 'admin')
+            <div class="invalid-feedback d-block">{{ $message }}</div>
+          @enderror
+          
+          <input type="email" name="email" 
+                 class="form-control mb-2 @error('email', 'admin') is-invalid @enderror" 
+                 placeholder="البريد الإلكتروني" 
+                 value="{{ old('email') }}" required>
+          @error('email', 'admin')
+            <div class="invalid-feedback d-block">{{ $message }}</div>
+          @enderror
+          
+          <input type="password" name="password" 
+                 class="form-control mb-2 @error('password', 'admin') is-invalid @enderror" 
+                 placeholder="كلمة المرور" required>
+          @error('password', 'admin')
+            <div class="invalid-feedback d-block">{{ $message }}</div>
+          @enderror
+          
+          <input type="password" name="password_confirmation" 
+                 class="form-control mb-2" 
+                 placeholder="تأكيد كلمة المرور" required>
         </div>
         <div class="modal-footer">
           <button type="submit" class="btn btn-dark">إضافة</button>
@@ -779,7 +1173,6 @@
     </form>
   </div>
 </div>
-
 <!-- Notification Modal -->
 <div class="modal fade @if($errors->hasBag('notification')) show d-block @endif" id="sendNotificationModal" tabindex="-1" aria-labelledby="sendNotificationModalLabel" aria-hidden="true">
   <div class="modal-dialog">

@@ -45,6 +45,7 @@
         .admin-layout {
             display: flex;
             min-height: 100vh;
+            position: relative;
         }
         
         /* Sidebar Styles */
@@ -53,10 +54,13 @@
             background: linear-gradient(to bottom, var(--dark), var(--primary));
             color: white;
             position: fixed;
+            right: 0;
+            top: 0;
             height: 100vh;
             transition: all 0.3s ease;
-            z-index: 1000;
-            box-shadow: 3px 0 10px rgba(0, 0, 0, 0.1);
+            z-index: 1040;
+            box-shadow: -3px 0 10px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
         }
         
         .sidebar-logo {
@@ -65,6 +69,10 @@
             align-items: center;
             justify-content: center;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: sticky;
+            top: 0;
+            background: var(--dark);
+            z-index: 10;
         }
         
         .sidebar-logo h3 {
@@ -93,6 +101,7 @@
             align-items: center;
             transition: all 0.3s ease;
             border-right: 3px solid transparent;
+            text-decoration: none;
         }
         
         .nav-link:hover, .nav-link.active {
@@ -113,6 +122,8 @@
             flex: 1;
             margin-right: var(--sidebar-width);
             padding-top: var(--topbar-height);
+            width: 100%;
+            transition: margin-right 0.3s ease;
         }
         
         /* Topbar Styles */
@@ -125,15 +136,17 @@
             left: 0;
             display: flex;
             align-items: center;
+            justify-content: space-between;
             padding: 0 25px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            z-index: 999;
+            z-index: 1030;
             transition: all 0.3s ease;
         }
         
         .topbar-left {
             display: flex;
             align-items: center;
+            gap: 15px;
         }
         
         .toggle-sidebar {
@@ -141,7 +154,15 @@
             border: none;
             font-size: 1.5rem;
             color: var(--dark);
-            margin-left: 15px;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            display: none;
+        }
+        
+        .toggle-sidebar:hover {
+            background: var(--light);
         }
         
         .topbar-title {
@@ -154,7 +175,7 @@
         .topbar-right {
             display: flex;
             align-items: center;
-            margin-right: auto;
+            gap: 15px;
         }
         
         .user-dropdown {
@@ -172,7 +193,7 @@
             align-items: center;
             justify-content: center;
             font-weight: 600;
-            margin-left: 15px;
+            margin-left: 10px;
         }
         
         .notification-badge {
@@ -188,6 +209,26 @@
             align-items: center;
             justify-content: center;
             font-size: 0.7rem;
+            font-weight: bold;
+        }
+        
+        /* Sidebar Overlay for Mobile */
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1035;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .sidebar-overlay.active {
+            display: block;
+            opacity: 1;
         }
         
         /* Content Area */
@@ -285,25 +326,6 @@
             text-align: center;
         }
         
-        /* Responsive */
-        @media (max-width: 992px) {
-            .admin-sidebar {
-                transform: translateX(calc(-1 * var(--sidebar-width)));
-            }
-            
-            .admin-sidebar.active {
-                transform: translateX(0);
-            }
-            
-            .admin-main {
-                margin-right: 0;
-            }
-            
-            .admin-topbar {
-                right: 0;
-            }
-        }
-        
         /* Buttons */
         .btn-primary {
             background-color: var(--primary);
@@ -361,12 +383,156 @@
         .badge-danger {
             background-color: #e76f51;
         }
+        
+        /* ============================================
+           RESPONSIVE MOBILE STYLES
+        ============================================ */
+        
+        /* Tablet Breakpoint */
+        @media (max-width: 1024px) {
+            .admin-content {
+                padding: 20px;
+            }
+            
+            .topbar-title {
+                font-size: 1.1rem;
+            }
+        }
+        
+        /* Mobile Breakpoint */
+        @media (max-width: 992px) {
+            :root {
+                --sidebar-width: 280px;
+            }
+            
+            /* Hide sidebar by default on mobile */
+            .admin-sidebar {
+                transform: translateX(100%);
+            }
+            
+            /* Show sidebar when active */
+            .admin-sidebar.active {
+                transform: translateX(0);
+            }
+            
+            /* Remove margin from main content */
+            .admin-main {
+                margin-right: 0;
+            }
+            
+            /* Adjust topbar */
+            .admin-topbar {
+                right: 0;
+                left: 0;
+                padding: 0 15px;
+            }
+            
+            /* Show toggle button */
+            .toggle-sidebar {
+                display: block;
+            }
+            
+            /* Adjust content padding */
+            .admin-content {
+                padding: 15px;
+            }
+            
+            /* Stack breadcrumb items */
+            .breadcrumb {
+                flex-wrap: wrap;
+            }
+        }
+        
+        /* Small Mobile Breakpoint */
+        @media (max-width: 576px) {
+            :root {
+                --sidebar-width: 85vw;
+                --topbar-height: 60px;
+            }
+            
+            .sidebar-logo h3 {
+                font-size: 1.2rem;
+            }
+            
+            .topbar-title {
+                font-size: 0.95rem;
+                max-width: 150px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+            
+            .user-dropdown .d-block {
+                display: none !important;
+            }
+            
+            .user-avatar {
+                margin-left: 0;
+            }
+            
+            .admin-content {
+                padding: 10px;
+            }
+            
+            .page-title {
+                font-size: 1.3rem;
+            }
+            
+            .breadcrumb {
+                font-size: 0.85rem;
+            }
+            
+            .nav-link {
+                padding: 10px 15px;
+                font-size: 0.95rem;
+            }
+            
+            .card-body {
+                padding: 15px;
+            }
+            
+            /* Hide notification badge number on very small screens */
+            .notification-badge {
+                font-size: 0.6rem;
+                width: 18px;
+                height: 18px;
+            }
+            
+            /* Make tables responsive */
+            .admin-table {
+                font-size: 0.85rem;
+            }
+            
+            .admin-table td, .admin-table th {
+                padding: 8px 10px;
+            }
+        }
+        
+        /* Extra Small Devices */
+        @media (max-width: 375px) {
+            .topbar-title {
+                font-size: 0.85rem;
+                max-width: 120px;
+            }
+            
+            .toggle-sidebar {
+                font-size: 1.3rem;
+                padding: 5px 8px;
+            }
+            
+            .nav-link {
+                font-size: 0.9rem;
+            }
+        }
     </style>
 </head>
 <body>
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    
     <div class="admin-layout">
         <!-- Sidebar -->
-        <aside class="admin-sidebar">
+        <aside class="admin-sidebar" id="adminSidebar">
             <div class="sidebar-logo">
                 <h3>مركز <span>الفرقان</span></h3>
             </div>
@@ -396,42 +562,48 @@
                     <li class="nav-item">
                         <a href="{{ route('admin.enrollments.index') }}"
                          class="nav-link {{ request()->routeIs('admin.enrollments.*') ? 'active' : '' }}">
-                            <i class="fas fa-book"></i>
-                            <span>ادارات طلبات التسجيل </span>
+                            <i class="fas fa-user-check"></i>
+                            <span>إدارة طلبات التسجيل</span>
                         </a>
                     </li>
-                   
+                    <li class="nav-item">
+                        <a href="{{ route('admin.admins.index') }}"
+                         class="nav-link {{ request()->routeIs('admin.admins.*') ? 'active' : '' }}">
+                            <i class="fas fa-user-shield"></i>
+                            <span>إدارة مشرفي المنصة</span>
+                        </a>
+                    </li>
                     <li class="nav-item">
                         <a href="{{ route('admin.students.index') }}"
-                                        class="nav-link {{ request()->routeIs('admin.students.*') ? 'active' : '' }}">
+                         class="nav-link {{ request()->routeIs('admin.students.*') ? 'active' : '' }}">
                             <i class="fas fa-users"></i>
                             <span>إدارة الطلاب</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('admin.sheikhs.index') }}"
-                                        class="nav-link {{ request()->routeIs('admin.sheikhs.*') ? 'active' : '' }}">
+                         class="nav-link {{ request()->routeIs('admin.sheikhs.*') ? 'active' : '' }}">
                             <i class="fas fa-user-tie"></i>
                             <span>إدارة المشايخ</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('admin.hifz_logs.index') }}"
-                                        class="nav-link {{ request()->routeIs('admin.hifz_logs.*') ? 'active' : '' }}">
+                         class="nav-link {{ request()->routeIs('admin.hifz_logs.*') ? 'active' : '' }}">
                             <i class="fas fa-quran"></i>
                             <span>سجل الحفظ</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('admin.review_logs.index') }}" 
-                                       class="nav-link {{ request()->routeIs('admin.review_logs.*') ? 'active' : '' }}">
-                            <i class="fas fa-quran"></i>
+                         class="nav-link {{ request()->routeIs('admin.review_logs.*') ? 'active' : '' }}">
+                            <i class="fas fa-book-reader"></i>
                             <span>سجل المراجعة</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('admin.notifications.index') }}" 
-                        class="nav-link {{ request()->routeIs('admin.notifications.*') ? 'active' : '' }}">
+                         class="nav-link {{ request()->routeIs('admin.notifications.*') ? 'active' : '' }}">
                             <i class="fas fa-bell"></i>
                             <span>الإشعارات</span>
                         </a>
@@ -463,7 +635,7 @@
             <!-- Topbar -->
             <header class="admin-topbar">
                 <div class="topbar-left">
-                    <button class="toggle-sidebar">
+                    <button class="toggle-sidebar" id="toggleSidebar" aria-label="Toggle Sidebar">
                         <i class="fas fa-bars"></i>
                     </button>
                     <h2 class="topbar-title">@yield('title')</h2>
@@ -471,7 +643,7 @@
                 
                 <div class="topbar-right">
                     <div class="dropdown me-3 position-relative">
-                        <a href="#" class="text-dark fs-4">
+                        <a href="#" class="text-dark fs-4" aria-label="Notifications">
                             <i class="fas fa-bell"></i>
                             <span class="notification-badge">3</span>
                         </a>
@@ -480,7 +652,7 @@
                     <div class="dropdown user-dropdown">
                         <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                             <div class="user-avatar">م</div>
-                            <div>
+                            <div class="d-none d-md-block">
                                 <span class="d-block fw-bold">مدير النظام</span>
                                 <small class="text-muted">الإدارة العامة</small>
                             </div>
@@ -489,7 +661,7 @@
                             <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i> الملف الشخصي</a></li>
                             <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i> الإعدادات</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="#"><i class="fas fa-sign-out-alt me-2"></i> تسجيل الخروج</a></li>
+                            <li><a class="dropdown-item" href="{{ route('logout') }}"><i class="fas fa-sign-out-alt me-2"></i> تسجيل الخروج</a></li>
                         </ul>
                     </div>
                 </div>
@@ -501,7 +673,7 @@
                 <nav aria-label="breadcrumb" class="mb-4">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}"><i class="fas fa-home"></i> الرئيسية</a></li>
-                        <li class="breadcrumb-item"><a href="{{ route('mosques.index') }}">المساجد</a></li>
+                        @yield('breadcrumb')
                         <li class="breadcrumb-item active" aria-current="page">@yield('title')</li>
                     </ol>
                 </nav>
@@ -515,7 +687,7 @@
                 <div class="container-fluid">
                     <div class="row">
                         <div class="col-12">
-                            <p class="mb-0">© 2023 مركز الفرقان للقرآن الكريم. جميع الحقوق محفوظة.</p>
+                            <p class="mb-0">© 2024 مركز الفرقان للقرآن الكريم. جميع الحقوق محفوظة.</p>
                         </div>
                     </div>
                 </div>
@@ -528,10 +700,46 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     
     <script>
-        // Toggle sidebar on mobile
         $(document).ready(function() {
-            $('.toggle-sidebar').click(function() {
-                $('.admin-sidebar').toggleClass('active');
+            const sidebar = $('#adminSidebar');
+            const overlay = $('#sidebarOverlay');
+            const toggleBtn = $('#toggleSidebar');
+            
+            // Toggle sidebar
+            function toggleSidebar() {
+                sidebar.toggleClass('active');
+                overlay.toggleClass('active');
+                $('body').toggleClass('overflow-hidden');
+            }
+            
+            // Toggle button click
+            toggleBtn.on('click', function() {
+                toggleSidebar();
+            });
+            
+            // Overlay click to close
+            overlay.on('click', function() {
+                toggleSidebar();
+            });
+            
+            // Close sidebar when clicking a link on mobile
+            if (window.innerWidth <= 992) {
+                $('.nav-link').on('click', function() {
+                    setTimeout(function() {
+                        sidebar.removeClass('active');
+                        overlay.removeClass('active');
+                        $('body').removeClass('overflow-hidden');
+                    }, 200);
+                });
+            }
+            
+            // Handle window resize
+            $(window).on('resize', function() {
+                if (window.innerWidth > 992) {
+                    sidebar.removeClass('active');
+                    overlay.removeClass('active');
+                    $('body').removeClass('overflow-hidden');
+                }
             });
             
             // Set current Arabic date
@@ -540,10 +748,9 @@
                 weekday: 'long', 
                 year: 'numeric', 
                 month: 'long', 
-                day: 'numeric',
-                calendar: 'islamic-umalqura'
+                day: 'numeric'
             };
-            const arabicDate = new Intl.DateTimeFormat('ar-SA-u-nu-latn', options).format(event);
+            const arabicDate = event.toLocaleDateString('ar-SA', options);
             $('#current-date').text(arabicDate);
         });
     </script>

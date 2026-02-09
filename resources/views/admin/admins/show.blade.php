@@ -42,7 +42,7 @@
                 <p class="text-muted mb-3">{{ $admin->phone }}</p>
                 
                 <div class="d-flex justify-content-center mb-3">
-                    <span class="badge bg-{{ $admin->isSuperAdmin() ? 'danger' : 'primary' }}">
+                    <span class="badge bg-{{ $admin->isAdmin() ? 'danger' : 'primary' }}">
                         {{ $admin->roles->first()->name === 'super_admin' ? 'مدير عام' : 'مدير' }}
                     </span>
                 </div>

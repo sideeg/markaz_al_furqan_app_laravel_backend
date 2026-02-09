@@ -66,7 +66,7 @@
                         </td>
                         <td>{{ $admin->email }}</td>
                         <td>
-                            <span class="badge bg-{{ $admin->isSuperAdmin() ? 'danger' : 'primary' }}">
+                            <span class="badge bg-{{ $admin->isAdmin() ? 'danger' : 'primary' }}">
                                 {{ $admin->roles->first()->name === 'super_admin' ? 'مدير عام' : 'مدير' }}
                             </span>
                         </td>
