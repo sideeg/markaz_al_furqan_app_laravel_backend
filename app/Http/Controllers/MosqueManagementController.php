@@ -89,7 +89,7 @@ class MosqueManagementController extends Controller
      */
     public function show(Mosque $mosque)
     {
-        $mosque->load('creator', 'courses.sheikh');
+        // $mosque->with('creator');
         return view('admin.mosques.show', compact('mosque'));
     }
 
