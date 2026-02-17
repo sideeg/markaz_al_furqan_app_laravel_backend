@@ -19,28 +19,7 @@ return new class extends Migration
         $table->string('password');
         $table->string('phone')->nullable();
         $table->string('national_id')->nullable();
-        $table->enum('qiraat', [
-            'شعبة عن عاصم الكوفي',
-            'حفص عن عاصم الكوفي',
-            'خلف عن حمزة الكوفي',
-            'خلاد عن حمزة الكوفي',
-            'قالون عن نافع المدني',
-            'ورش عن نافع المدني',
-            'البزي عن ابن كثير المكي',
-            'قنبل عن ابن كثير المكي',
-            'الدوري عن أبي عمرو البصري',
-            'السوسي عن أبي عمرو البصري',
-            'هشام عن ابن عامر الشامي',
-            'ابن ذكوان عن ابن عامر الشامي',
-            'أبو الحارث عن الكسائي الكوفي',
-            'الدوري عن الكسائي الكوفي',
-            'ابن وردان عن أبي جعفر المدني',
-            'ابن جماز عن أبي جعفر المدني',
-            'رويس عن يعقوب الحضرمي',
-            'روح عن يعقوب الحضرمي',
-            'إسحاق عن خلف العاشر',
-            'إدريس عن خلف العاشر',
-        ])->nullable()->comment('Preferred Quranic recitation style');
+        $table->string('qiraat')->nullable();
         $table->string('profile_image')->nullable();
         $table->boolean('is_active')->default(true);
         $table->rememberToken();

@@ -22,6 +22,7 @@
                         <th scope="col">الاسم</th>
                         <th scope="col">البريد الإلكتروني</th>
                         <th scope="col">الهاتف</th>
+                        <th scope="col">الجنس</th>
                         <th scope="col">القراءة</th>
                         <th scope="col">الدورات</th>
                         <th scope="col">الحالة</th>
@@ -43,6 +44,14 @@
                         <td>{{ $student->name }}</td>
                         <td>{{ $student->email }}</td>
                         <td>{{ $student->phone }}</td>
+                        <td> @if($student->gender)
+                            <span class="badge {{ $student->gender == 'ذكر' ? 'bg-info text-dark' : 'bg-warning text-dark' }}">
+                                {{ $student->gender }}
+                            </span>
+                            @else
+                                <span class="text-muted">—</span>
+                            @endif
+                        </td>
                         <td>{{ $student->qiraat }}</td>
                         <td>
                             <span class="badge bg-info text-dark">{{ $student->enrolledCourses->count() }}</span>

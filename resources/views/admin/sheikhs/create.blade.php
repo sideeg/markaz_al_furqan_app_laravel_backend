@@ -51,6 +51,17 @@
                         <input type="text" class="form-control" name="qiraat" required>
                         <small class="text-muted">مثال: حفص عن عاصم</small>
                     </div>
+                    <div class="mb-3">
+        <label class="form-label fw-bold">الجنس <span class="text-danger">*</span></label>
+        <select name="gender" class="form-control @error('gender') is-invalid @enderror" required>
+            <option value="">اختر الجنس</option>
+            <option value="ذكر" {{ old('gender') == 'ذكر' ? 'selected' : '' }}>ذكر</option>
+            <option value="أنثى" {{ old('gender') == 'أنثى' ? 'selected' : '' }}>أنثى</option>
+        </select>
+        @error('gender')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+    </div>
                     
                     <div class="mb-3">
                         <label class="form-label fw-bold">كلمة المرور <span class="text-danger">*</span></label>

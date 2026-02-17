@@ -23,15 +23,17 @@ class SheikhController extends Controller
         try {
             Log::info('Sheikh login request data: ', $request->all());
             $user = User::where('email', $request->email)->first();
-            Log::info('User found: ', ['user_password' => $user->password]);
-            // if (!$user || !Hash::check($request->password, $user->password)) {
-            //     throw ValidationException::withMessages([
-            //         'email' => ['البريد الإلكتروني أو كلمة المرور غير صحيحة'],
-            //     ]);
-            // }
+            if($user) {
+                Log::info('User found: ', ['user_password' => $user->password]);
+            }
+            if (!$user || !Hash::check($request->password, $user->password)) {
+                throw ValidationException::withMessages([
+                    'email' => ['البريد الإلكتروني أو كلمة المرور غير صحيحة'],
+                ]);
+            }
 
             // Check if user is active
-             Log::info('User found: ', ['user_id' => $user->id]);
+            Log::info('User found: ', ['user_id' => $user->id]);
             if (!$user->is_active) {
                 return response()->json([
                     'success' => false,
@@ -61,12 +63,14 @@ class SheikhController extends Controller
             ]);
 
         } catch (ValidationException $e) {
+            Log::error('Sheikh login validation error: ', [$e->errors()]);
             return response()->json([
                 'success' => false,
                 'message' => 'بيانات الدخول غير صحيحة',
                 'errors' => $e->errors(),
             ], 422);
         } catch (\Exception $e) {
+            Log::error('Sheikh login error: ',[ $e->getMessage()]);
             return response()->json([
                 'success' => false,
                 'message' => 'حدث خطأ أثناء تسجيل الدخول',

@@ -24,6 +24,7 @@ class User extends Authenticatable
         'phone',
         'national_id',
         'qiraat',
+        'gender',
         'profile_image',
         'is_active',
     ];

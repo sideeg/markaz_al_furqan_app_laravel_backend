@@ -15,6 +15,7 @@
                 <li class="list-group-item">الهاتف: {{ $student->phone }}</li>
                 <li class="list-group-item">الهوية: {{ $student->national_id }}</li>
                 <li class="list-group-item">القراءة: {{ $student->qiraat }}</li>
+                <li class="list-group-item">الجنس: {{ $student->gender ?? '—' }}</li>   
                 <li class="list-group-item">الحالة: {{ $student->is_active ? 'نشط' : 'غير نشط' }}</li>
             </ul>
         </div>

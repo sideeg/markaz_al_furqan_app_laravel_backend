@@ -96,6 +96,21 @@
                     </li>
                     <li class="list-group-item d-flex justify-content-between align-items-center">
                         <div>
+                            <i class="fas fa-venus-mars me-2 text-primary"></i>
+                            الجنس
+                        </div>
+                        <span>
+                            @if($admin->gender)
+                                <span class="badge {{ $admin->gender == 'ذكر' ? 'bg-info text-dark' : 'bg-warning text-dark' }}">
+                                    {{ $admin->gender }}
+                                </span>
+                            @else
+                                <span class="text-muted">—</span>
+                            @endif
+                        </span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
                             <i class="fas fa-calendar me-2 text-primary"></i>
                             تاريخ التسجيل
                         </div>

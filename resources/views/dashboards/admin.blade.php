@@ -1033,7 +1033,14 @@
 @error('qiraat')
     <div class="invalid-feedback">{{ $message }}</div>
 @enderror
-
+<select name="gender" class="form-control mb-2 @error('gender') is-invalid @enderror">
+    <option value="">اختر الجنس</option>
+    <option value="ذكر" {{ old('gender') == 'ذكر' ? 'selected' : '' }}>ذكر</option>
+    <option value="أنثي" {{ old('gender') == 'أنثي' ? 'selected' : '' }}>أنثي</option>
+</select>
+@error('gender')
+    <div class="invalid-feedback d-block">{{ $message }}</div>
+@enderror
           <input type="file" name="profile_image"
                  class="form-control mb-2 @error('profile_image') is-invalid @enderror">
           @error('profile_image')
@@ -1154,7 +1161,14 @@
           @error('email', 'admin')
             <div class="invalid-feedback d-block">{{ $message }}</div>
           @enderror
-          
+          <select name="gender" class="form-control mb-2 @error('gender', 'admin') is-invalid @enderror">
+                <option value="">اختر الجنس</option>
+                <option value="ذكر"  {{ old('gender') == 'ذكر'  ? 'selected' : '' }}>ذكر</option>
+                <option value="أنثي" {{ old('gender') == 'أنثي' ? 'selected' : '' }}>أنثي</option>
+            </select>
+            @error('gender', 'admin')
+            <div class="invalid-feedback d-block">{{ $message }}</div>
+            @enderror
           <input type="password" name="password" 
                  class="form-control mb-2 @error('password', 'admin') is-invalid @enderror" 
                  placeholder="كلمة المرور" required>

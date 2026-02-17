@@ -39,6 +39,7 @@
                         <th>البريد الإلكتروني</th>
                         <th>الهاتف</th>
                         <th>القراءات</th>
+                        <th>الجنس</th>
                         <th>الدورات</th>
                         <th>الحالة</th>
                         <th>الإجراءات</th>
@@ -70,6 +71,14 @@
                         <td>{{ $sheikh->email }}</td>
                         <td>{{ $sheikh->phone }}</td>
                         <td>{{ $sheikh->qiraat }}</td>
+                        <td> @if($sheikh->gender)
+                                <span class="badge {{ $sheikh->gender == 'ذكر' ? 'bg-info' : 'bg-warning text-dark' }}">
+                                    {{ $sheikh->gender }}
+                                </span>
+                            @else
+                                <span class="text-muted">—</span>
+                            @endif
+                        </td>
                         <td>
                             <span class="badge bg-primary">
                                 {{ $sheikh->teachingCourses->count() }}
@@ -151,7 +160,14 @@
           @error('phone', 'sheikh')
             <div class="invalid-feedback d-block">{{ $message }}</div>
           @enderror
-
+            <select name="gender" class="form-control mb-2 @error('gender') is-invalid @enderror">
+            <option value="">اختر الجنس</option>
+            <option value="ذكر" {{ old('gender') == 'ذكر' ? 'selected' : '' }}>ذكر</option>
+            <option value="أنثي" {{ old('gender') == 'أنثي' ? 'selected' : '' }}>أنثي</option>
+        </select>
+        @error('gender')
+            <div class="invalid-feedback d-block">{{ $message }}</div>
+        @enderror
           <input type="text" name="national_id"
                  class="form-control mb-2 @error('national_id') is-invalid @enderror"
                  placeholder="الرقم الوطني" value="{{ old('national_id') }}">

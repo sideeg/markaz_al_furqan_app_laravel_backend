@@ -43,7 +43,17 @@
                                value="{{ old('phone', $admin->phone) }}" required>
                     </div>
                 </div>
-                
+                <div class="mb-3">
+                    <label class="form-label fw-bold">الجنس <span class="text-danger">*</span></label>
+                    <select name="gender" class="form-select @error('gender') is-invalid @enderror" required>
+                        <option value="">اختر الجنس</option>
+                        <option value="ذكر"  {{ old('gender', $admin->gender) == 'ذكر'  ? 'selected' : '' }}>ذكر</option>
+                        <option value="أنثي" {{ old('gender', $admin->gender) == 'أنثي' ? 'selected' : '' }}>أنثي</option>
+                    </select>
+                    @error('gender')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
                 <div class="col-md-6">
                     <div class="mb-3">
                         <label class="form-label fw-bold">الدور <span class="text-danger">*</span></label>

@@ -37,6 +37,7 @@
                     <tr>
                         <th>المدير</th>
                         <th>البريد الإلكتروني</th>
+                        
                         <th>الدور</th>
                         <th>الحالة</th>
                         <th>الإجراءات</th>
@@ -49,18 +50,24 @@
                             <div class="d-flex align-items-center">
                                 @if($admin->profile_image)
                                 <img src="{{ $admin->profile_image_url }}" 
-                                     alt="{{ $admin->name }}" 
-                                     class="rounded-circle me-3" 
-                                     width="40" height="40">
+                                    alt="{{ $admin->name }}" 
+                                    class="rounded-circle me-3" 
+                                    width="40" height="40">
                                 @else
                                 <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-3" 
-                                     style="width: 40px; height: 40px;">
+                                    style="width: 40px; height: 40px;">
                                     <span class="fw-bold">{{ $admin->initials }}</span>
                                 </div>
                                 @endif
                                 <div>
                                     <strong>{{ $admin->name }}</strong>
                                     <div class="text-muted small">{{ $admin->phone }}</div>
+                                    {{-- ADD THIS --}}
+                                    @if($admin->gender)
+                                        <span class="badge {{ $admin->gender == 'ذكر' ? 'bg-info text-dark' : 'bg-warning text-dark' }}">
+                                            {{ $admin->gender }}
+                                        </span>
+                                    @endif
                                 </div>
                             </div>
                         </td>

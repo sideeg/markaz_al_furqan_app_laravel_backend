@@ -29,8 +29,9 @@ class AuthController extends Controller
                 'phone' => $request->phone,
                 'national_id' => $request->national_id,
                 'qiraat' => $request->qiraat,
+                'gender'                => $request->gender,
             ]);
-        Log::info('User created: ', ['user_id' => $user->id]);
+            Log::info('User created: ', ['user_id' => $user->id]);
             // Assign default role
             $user->assignRole('student');
 
@@ -47,6 +48,7 @@ class AuthController extends Controller
             ], 201);
 
         } catch (\Exception $e) {
+            Log::info('Error creating user: ', ['error' => $e->getMessage()]);
             return response()->json([
                 'success' => false,
                 'message' => 'حدث خطأ أثناء إنشاء الحساب',
@@ -63,7 +65,7 @@ class AuthController extends Controller
         Log::info('Login request data: ', $request->only('email'));
         try {
             $user = User::where('email', $request->email)->first();
-
+            Log::info('User found: ', ['user_id' => $user->id]);
             if (!$user || !Hash::check($request->password, $user->password)) {
                 throw ValidationException::withMessages([
                     'email' => ['البريد الإلكتروني أو كلمة المرور غير صحيحة'],
@@ -97,12 +99,14 @@ class AuthController extends Controller
             ]);
 
         } catch (ValidationException $e) {
+            Log::info('Validation error: ', $e->errors());
             return response()->json([
                 'success' => false,
                 'message' => 'بيانات الدخول غير صحيحة',
                 'errors' => $e->errors(),
             ], 422);
         } catch (\Exception $e) {
+            Log::info('Login error: ', $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'حدث خطأ أثناء تسجيل الدخول',
@@ -286,6 +290,7 @@ class AuthController extends Controller
             'phone' => $user->phone,
             'national_id' => $user->national_id,
             'qiraat' => $user->qiraat,
+            'gender'        => $user->gender,
             'profile_image' => $user->profile_image_url,
             'role' => $user->role,
             'is_active' => $user->is_active,

@@ -29,6 +29,17 @@
 @error('qiraat')
     <div class="invalid-feedback">{{ $message }}</div>
 @enderror
+<div class="mb-3">
+    <label>الجنس</label>
+    <select name="gender" class="form-control @error('gender') is-invalid @enderror">
+        <option value="">اختر الجنس</option>
+        <option value="ذكر"  {{ old('gender', $student->gender ?? '') == 'ذكر'  ? 'selected' : '' }}>ذكر</option>
+        <option value="أنثي" {{ old('gender', $student->gender ?? '') == 'أنثي' ? 'selected' : '' }}>أنثي</option>
+    </select>
+    @error('gender')
+        <div class="invalid-feedback">{{ $message }}</div>
+    @enderror
+</div>
         </div>
         <div class="mb-3">
             <label>الصورة الشخصية</label>
