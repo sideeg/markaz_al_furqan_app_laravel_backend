@@ -44,7 +44,6 @@ class SheikhController extends Controller
             'phone' => 'required|unique:users,phone',
             'national_id' => 'required|unique:users,national_id',
             'qiraat' => 'required|string|max:50',
-            'gender'        => 'required|in:ذكر,أنثي',
             'profile_image' => 'nullable|image|max:2048',
             'password' => 'required|min:8|confirmed',
         ]);
@@ -132,7 +131,6 @@ class SheikhController extends Controller
                 Rule::unique('users')->ignore($sheikh->id)
             ],
             'qiraat' => 'required|string|max:50',
-            'gender'        => 'required|in:ذكر,أنثي',
             'profile_image' => 'nullable|image|max:2048',
             'password' => 'nullable|min:8|confirmed',
         ]);

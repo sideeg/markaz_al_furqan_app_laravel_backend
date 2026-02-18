@@ -47,7 +47,6 @@ class AdminController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'gender'        => 'nullable|in:ذكر,أنثي',
             'phone' => 'nullable|unique:users,phone',  // Made optional
             'role' => 'nullable|in:admin,super_admin',  // Made optional with default
             'profile_image' => 'nullable|image|max:2048',
@@ -134,7 +133,6 @@ class AdminController extends Controller
                 'required',
                 Rule::unique('users')->ignore($admin->id)
             ],
-            'gender'        => 'nullable|in:ذكر,أنثي',
             'role' => 'required|in:admin,super_admin',
             'profile_image' => 'nullable|image|max:2048',
             'password' => 'nullable|min:8|confirmed',
