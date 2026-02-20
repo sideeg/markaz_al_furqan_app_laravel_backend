@@ -21,11 +21,8 @@ class SheikhController extends Controller
     public function login(Request $request)
     {
         try {
-            Log::info('Sheikh login request data: ', $request->all());
             $user = User::where('email', $request->email)->first();
-            if($user) {
-                Log::info('User found: ', ['user_password' => $user->password]);
-            }
+            
             if (!$user || !Hash::check($request->password, $user->password)) {
                 throw ValidationException::withMessages([
                     'email' => ['البريد الإلكتروني أو كلمة المرور غير صحيحة'],
@@ -33,7 +30,6 @@ class SheikhController extends Controller
             }
 
             // Check if user is active
-            Log::info('User found: ', ['user_id' => $user->id]);
             if (!$user->is_active) {
                 return response()->json([
                     'success' => false,
@@ -94,11 +90,7 @@ class SheikhController extends Controller
                   ->with(['course.mosque']) // تحميل البيانات المطلوبة
                   ->get();
     
-    Log::info('Fetching courses for sheikh: ', [
-        'sheikh_id' => auth()->id(),
-        'sheikh_name' => auth()->user()->name,
-        'groups_count' => $groups->count()
-    ]);
+   
 
     if ($groups->isEmpty()) {
         return response()->json([
@@ -155,8 +147,6 @@ class SheikhController extends Controller
         }
     }
 
-    Log::info('Course data prepared: ', ['courses_count' => count($coursesData)]);
-
     return response()->json([
         'success' => true,
         'data' => $coursesData,
@@ -185,20 +175,13 @@ class SheikhController extends Controller
     {
         $groups= Group::where('course_id', $course_id)->where('sheikh_id', auth()->id())->with('students')->get();
         if ($groups->isEmpty()) {
-            Log::info('No groups found for course', [
-                'course_id' => $course_id,
-                'sheikh_id' => auth()->id()
-            ]);
+           
             return response()->json([
                 'success' => false,
                 'message' => 'لا توجد مجموعات لهذه الدورة',
             ], 404);
         }
-        Log::info('Fetching groups for course: ', [
-            'course_id' => $course_id,
-            'sheikh_id' => auth()->id(),
-            'groups_count' => $groups->count()
-        ]);
+        
         return response()->json([
             'success' => true,
             'data' => $groups
@@ -306,14 +289,12 @@ public function myStudents()
         $user = auth()->user();
         if ($user) {
             $user->tokens()->delete();
-            Log::info('Sheikh logged out successfully', ['sheikh_id' => $user->id]);
             return response()->json([
                 'success' => true,
                 'message' => 'تم تسجيل الخروج بنجاح',
             ]);
         }
 
-        Log::warning('Logout attempt without authenticated user');
         return response()->json([
             'success' => false,
             'message' => 'لم يتم العثور على مستخدم مسجل الدخول',
@@ -323,7 +304,6 @@ public function myStudents()
     public function updateProfile(Request $request)
     {
         
-        Log::info('Sheikh profile update request data: ', $request->all());
         $user = auth()->user();
         // Handle password update separately
         if ($request->has('current_password')) {
@@ -333,10 +313,8 @@ public function myStudents()
                 'new_password' => 'required|string|min:8|confirmed:new_password_confirmation',
                 'new_password_confirmation' => 'required|string',
             ]);
-            Log::info("hash check",[Hash::check($request->current_password, $user->password)]);
             // Check if current password is correct
             if (!Hash::check($request->current_password, $user->password)) {
-                Log::info("it's here");
                 return response()->json([
                     'success' => false,
                     'message' => 'كلمة المرور الحالية غير صحيحة',
@@ -347,8 +325,6 @@ public function myStudents()
             $user->update([
                 'password' => Hash::make($request->new_password),
             ]);
-
-            Log::info('Sheikh password updated successfully', ['sheikh_id' => $user->id]);
 
             return response()->json([
                 'success' => true,
@@ -370,8 +346,6 @@ public function myStudents()
         }
 
         $user->update($data);
-
-        Log::info('Sheikh profile updated successfully', ['sheikh_id' => $user->id]);
 
         return response()->json([
             'success' => true,

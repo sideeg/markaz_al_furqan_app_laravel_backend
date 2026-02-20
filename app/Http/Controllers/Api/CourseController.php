@@ -61,11 +61,7 @@ class CourseController extends Controller
                     return $course;
                 });
             }
-            Log::info('Courses retrieved successfully', [
-                'total' => $courses->total(),
-                'current_page' => $courses->currentPage(),
-                'data' => $courses->toArray(),
-            ]);
+            
             return response()->json([
                 'success' => true,
                 'data' => $courses->items(),

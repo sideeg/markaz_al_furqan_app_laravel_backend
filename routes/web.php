@@ -167,7 +167,7 @@ Route::prefix('admin')->group(function() {
         ->name('admin.enrollments.reject');
 
     // controller method to return groups as JSON
-    Route::get('admin/courses/{course}/groups', function (App\Models\Course $course) {
+    Route::get('courses/{course}/groups', function (App\Models\Course $course) {
         return $course->groups()
             ->where('is_active', true)
             ->get()

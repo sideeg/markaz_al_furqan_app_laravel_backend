@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
+ 
 
 class AdminController extends Controller
 {
@@ -121,38 +123,40 @@ class AdminController extends Controller
         if (!$admin->isAdmin() ) {
             abort(404);
         }
-
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => [
-                'required',
-                'email',
-                Rule::unique('users')->ignore($admin->id)
-            ],
-            'phone' => [
-                'required',
-                Rule::unique('users')->ignore($admin->id)
-            ],
+            'phone' => ['required', Rule::unique('users')->ignoreModel($admin)],
+            'email' => ['required', 'email', Rule::unique('users')->ignoreModel($admin)],
             'role' => 'required|in:admin,super_admin',
+            'gender'       => 'required|in:ذكر,أنثي',
             'profile_image' => 'nullable|image|max:2048',
             'password' => 'nullable|min:8|confirmed',
+            'remove_image' => 'nullable|boolean',
         ]);
+        // Build the update data first
+        $updateData = [
+            'name'     => $request->name,
+            'email'    => $request->email,
+            'phone'    => $request->phone,
+            'gender'   => $request->gender,
+            'password' => $request->password ? Hash::make($request->password) : $admin->password,
+        ];
 
+        // Handle profile image upload
         if ($request->hasFile('profile_image')) {
-            // Delete old image if exists
             if ($admin->profile_image) {
                 Storage::disk('public')->delete($admin->profile_image);
             }
-            $admin->profile_image = $request->file('profile_image')->store('profiles', 'public');
+            $updateData['profile_image'] = $request->file('profile_image')->store('profiles', 'public');
         }
 
-        $admin->update([
-            'name' => $request->name,
-            'email' => $request->email,
-            'phone' => $request->phone,
-            'gender'   => $request->gender,
-            'password' => $request->password ? Hash::make($request->password) : $admin->password,
-        ]);
+        // Handle image removal checkbox
+        if ($request->boolean('remove_image') && $admin->profile_image) {
+            Storage::disk('public')->delete($admin->profile_image);
+            $updateData['profile_image'] = null;
+        }
+
+        $admin->update($updateData);
 
         // Update role if changed
         if ($admin->roles->first()->name !== $request->role) {

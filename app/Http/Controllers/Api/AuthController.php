@@ -20,7 +20,6 @@ class AuthController extends Controller
     public function register(Request $request): JsonResponse
     {
         
-        Log::info('Register request data: ', $request->all());
         try {
             $user = User::create([
                 'name' => $request->name,
@@ -31,7 +30,6 @@ class AuthController extends Controller
                 'qiraat' => $request->qiraat,
                 'gender'                => $request->gender,
             ]);
-            Log::info('User created: ', ['user_id' => $user->id]);
             // Assign default role
             $user->assignRole('student');
 
@@ -48,7 +46,6 @@ class AuthController extends Controller
             ], 201);
 
         } catch (\Exception $e) {
-            Log::info('Error creating user: ', ['error' => $e->getMessage()]);
             return response()->json([
                 'success' => false,
                 'message' => 'حدث خطأ أثناء إنشاء الحساب',
@@ -62,10 +59,8 @@ class AuthController extends Controller
      */
     public function login(Request $request): JsonResponse
     {
-        Log::info('Login request data: ', $request->only('email'));
         try {
             $user = User::where('email', $request->email)->first();
-            Log::info('User found: ', ['user_id' => $user->id]);
             if (!$user || !Hash::check($request->password, $user->password)) {
                 throw ValidationException::withMessages([
                     'email' => ['البريد الإلكتروني أو كلمة المرور غير صحيحة'],
@@ -73,16 +68,12 @@ class AuthController extends Controller
             }
 
             // Check if user is active
-             Log::info('User found: ', ['user_id' => $user->id]);
             if (!$user->is_active) {
                 return response()->json([
                     'success' => false,
                     'message' => 'حسابك غير مفعل. يرجى التواصل مع الإدارة',
                 ], 403);
-            }
-
-            Log::info('User is active: ', ['user_id' => $user->id]);
-            
+            }            
             // Revoke all existing tokens
             $user->tokens()->delete();
 
@@ -99,14 +90,12 @@ class AuthController extends Controller
             ]);
 
         } catch (ValidationException $e) {
-            Log::info('Validation error: ', $e->errors());
             return response()->json([
                 'success' => false,
                 'message' => 'بيانات الدخول غير صحيحة',
                 'errors' => $e->errors(),
             ], 422);
         } catch (\Exception $e) {
-            Log::info('Login error: ', $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'حدث خطأ أثناء تسجيل الدخول',
@@ -216,8 +205,6 @@ class AuthController extends Controller
             ]);
 
             $user = $request->user();
-            Log::info($user);
-            Log::info($request);
 
             if (!Hash::check($request->current_password, $user->password)) {
                 return response()->json([
