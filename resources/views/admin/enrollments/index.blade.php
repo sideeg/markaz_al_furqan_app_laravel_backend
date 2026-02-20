@@ -13,6 +13,9 @@
 <div class="admin-card">
     <div class="card-header bg-primary text-white">
         <h5>طلبات التسجيل في الدورات</h5>
+        <a href="{{ route('admin.enrollments.create') }}" class="btn btn-light btn-sm">
+        <i class="fas fa-user-plus"></i> تسجيل طالب
+    </a>
     </div>
     
     <div class="card-body">

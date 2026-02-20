@@ -135,4 +135,76 @@ class EnrollmentController extends Controller
         $enrollment->delete();
         return redirect()->back()->with('success', 'تم حذف طلب التسجيل بنجاح');
     }
+
+    /**
+ * Show form to manually enroll a student.
+ */
+public function create(Request $request)
+{
+    $courses = Course::active()->get();
+    $students = User::withRole('student')->get();
+    $selectedCourse = $request->course_id ? Course::with('groups')->find($request->course_id) : null;
+
+    return view('admin.enrollments.create', compact('courses', 'students', 'selectedCourse'));
+}
+
+/**
+ * Manually enroll a student (admin action — auto-approved).
+ */
+public function store(Request $request)
+{
+    $request->validate([
+        'course_id'  => 'required|exists:courses,id',
+        'student_id' => 'required|exists:users,id',
+        'group_id'   => 'nullable|exists:groups,id',
+        'notes'      => 'nullable|string|max:500',
+    ]);
+
+    $course = Course::findOrFail($request->course_id);
+
+    // Check for duplicate enrollment
+    $exists = Enrollment::where('course_id', $request->course_id)
+                        ->where('student_id', $request->student_id)
+                        ->whereIn('status', ['pending', 'approved'])
+                        ->exists();
+
+    if ($exists) {
+        return redirect()->back()
+            ->withInput()
+            ->with('error', 'الطالب مسجل بالفعل في هذه الدورة');
+    }
+
+    // Check available slots
+    if ($course->current_students >= $course->max_students) {
+        return redirect()->back()
+            ->withInput()
+            ->with('error', 'لا توجد أماكن متاحة في هذه الدورة');
+    }
+
+    DB::transaction(function () use ($request, $course) {
+        $enrollment = Enrollment::create([
+            'course_id'   => $request->course_id,
+            'student_id'  => $request->student_id,
+            'status'      => 'approved',   // admin enrollments are auto-approved
+            'enrolled_at' => now(),
+            'approved_at' => now(),
+            'approved_by' => auth()->id(),
+            'notes'       => $request->notes,
+        ]);
+
+        $course->increment('current_students');
+
+        // Assign to group if selected
+        if ($request->group_id) {
+            $group = \App\Models\Group::find($request->group_id);
+            if ($group) {
+                $group->students()->syncWithoutDetaching([$request->student_id]);
+                $group->increment('current_students');
+            }
+        }
+    });
+
+    return redirect()->route('admin.enrollments.index', ['status' => 'approved'])
+        ->with('success', 'تم تسجيل الطالب في الدورة بنجاح');
+}
 }

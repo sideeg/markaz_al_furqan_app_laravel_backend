@@ -10,6 +10,11 @@ class Group extends Model
         'name', 'description', 'course_id', 'max_students','sheikh_id', 'current_students', 'is_active', 'schedule_details', 'created_by',
     ];
 
+/**
+ * Get the group's sheikh.
+ *
+ * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+ */
     public function sheikh()
     {
         return $this->belongsTo(User::class, 'sheikh_id');

@@ -151,11 +151,13 @@ Route::prefix('admin')->group(function() {
     // Enrollment management routes
     Route::prefix('admin')->group(function() {
     Route::resource('enrollments', \App\Http\Controllers\Admin\EnrollmentController::class)
-        ->only(['index', 'show', 'destroy'])
+        ->only(['index', 'show', 'destroy','create', 'store'])
         ->names([
             'index' => 'admin.enrollments.index',
             'show' => 'admin.enrollments.show',
-            'destroy' => 'admin.enrollments.destroy'
+            'destroy' => 'admin.enrollments.destroy',
+            'create' => 'admin.enrollments.create',
+            'store' => 'admin.enrollments.store'
         ]);
     
     Route::post('enrollments/{enrollment}/approve', [\App\Http\Controllers\Admin\EnrollmentController::class, 'approve'])
@@ -163,6 +165,18 @@ Route::prefix('admin')->group(function() {
     
     Route::post('enrollments/{enrollment}/reject', [\App\Http\Controllers\Admin\EnrollmentController::class, 'reject'])
         ->name('admin.enrollments.reject');
+
+    // controller method to return groups as JSON
+    Route::get('admin/courses/{course}/groups', function (App\Models\Course $course) {
+        return $course->groups()
+            ->where('is_active', true)
+            ->get()
+            ->map(fn($g) => [
+                'id'              => $g->id,
+                'name'            => $g->name,
+                'available_slots' => max(0, $g->max_students - $g->current_students),
+            ]);
+    })->middleware(['auth', 'admin'])->name('admin.courses.groups');
 
         // Group management routes
 Route::prefix('admin/courses/{course}')->group(function() {
