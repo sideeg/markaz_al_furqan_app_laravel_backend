@@ -393,86 +393,85 @@ public function myStudents()
     public function getDashboard(Request $request)
     {
         $sheikhId = auth()->id();
-        
-        // Get counts using your actual models and relationships
-        
-        // Total Students: Get unique students from groups where this sheikh is assigned
+
         $totalStudents = User::role('student')
             ->whereHas('groups', function($q) use ($sheikhId) {
                 $q->where('sheikh_id', $sheikhId);
             })
             ->distinct()
             ->count();
-        
-        // Total Courses: Get courses that have groups where this sheikh is assigned
+
         $totalCourses = Course::whereHas('groups', function($q) use ($sheikhId) {
             $q->where('sheikh_id', $sheikhId);
         })
         ->distinct()
         ->count();
-        
-        // Total Groups: Get groups directly assigned to this sheikh
+
         $totalGroups = Group::where('sheikh_id', $sheikhId)->count();
-        
-        // Get recent hifz logs (last 5) using Eloquent with eager loading
+
+        // ── Recent hifz logs ──────────────────────────────────────────
         $recentHifzLogs = HifzLog::where('sheikh_id', $sheikhId)
             ->with(['student', 'course'])
             ->orderBy('created_at', 'desc')
             ->limit(5)
             ->get()
+            ->filter(fn($log) => $log->student !== null) // ← skip orphaned logs
             ->map(function($log) {
                 return [
-                    'id' => $log->id,
-                    'surah_name' => $log->start_sura, // or however you store surah name
-                    'from_ayah' => $log->start_ayah,
-                    'to_ayah' => $log->end_ayah,
-                    'date' => $log->date,
+                    'id'         => $log->id,
+                    'surah_name' => $log->start_sura,
+                    'from_ayah'  => $log->start_ayah,
+                    'to_ayah'    => $log->end_ayah,
+                    'date'       => $log->date,
                     'created_at' => $log->created_at,
-                    'student' => [
-                        'id' => $log->student->id,
+                    'student'    => [
+                        'id'   => $log->student->id,
                         'name' => $log->student->name,
                     ],
-                    'course' => [
-                        'id' => $log->course->id,
-                        'name' => $log->course->name,
+                    'course'     => [
+                        'id'   => $log->course?->id   ?? 0,         // ← null-safe
+                        'name' => $log->course?->name ?? 'غير محدد', // ← null-safe
                     ],
                 ];
-            });
-        
-        // Get recent review logs (last 5) using Eloquent with eager loading
+            })
+            ->values(); // re-index after filter
+
+        // ── Recent review logs ────────────────────────────────────────
         $recentReviewLogs = ReviewLog::where('sheikh_id', $sheikhId)
             ->with(['student'])
             ->orderBy('created_at', 'desc')
             ->limit(5)
             ->get()
+            ->filter(fn($log) => $log->student !== null) // ← skip orphaned logs
             ->map(function($log) {
                 return [
-                    'id' => $log->id,
+                    'id'         => $log->id,
                     'surah_name' => $log->surah,
-                    'from_ayah' => $log->start_ayah,
-                    'to_ayah' => $log->end_ayah,
-                    'date' => $log->date,
+                    'from_ayah'  => $log->start_ayah,
+                    'to_ayah'    => $log->end_ayah,
+                    'date'       => $log->date,
                     'created_at' => $log->created_at,
-                    'student' => [
-                        'id' => $log->student->id,
+                    'student'    => [
+                        'id'   => $log->student->id,
                         'name' => $log->student->name,
                     ],
-                    'course' => [
-                        'id' => 0, // ReviewLog doesn't have course_id in your model
+                    'course'     => [
+                        'id'   => 0,
                         'name' => 'مراجعة عامة',
                     ],
                 ];
-            });
-        
+            })
+            ->values();
+
         return response()->json([
             'success' => true,
-            'data' => [
+            'data'    => [
                 'stats' => [
                     'total_students' => $totalStudents,
-                    'total_courses' => $totalCourses,
-                    'total_groups' => $totalGroups,
+                    'total_courses'  => $totalCourses,
+                    'total_groups'   => $totalGroups,
                 ],
-                'recent_hifz_logs' => $recentHifzLogs,
+                'recent_hifz_logs'   => $recentHifzLogs,
                 'recent_review_logs' => $recentReviewLogs,
             ]
         ]);
