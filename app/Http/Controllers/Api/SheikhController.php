@@ -15,6 +15,8 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use App\Models\HifzLog;
 use App\Models\ReviewLog;
+use Illuminate\Support\Facades\DB;
+
 
 class SheikhController extends Controller
 {
