@@ -98,8 +98,9 @@ Route::middleware('role:sheikh')->prefix('sheikh')->group(function () {
     Route::post('/hifz-logs', [HifzController::class, 'store']);
     Route::put('/hifz-logs/{hifzLog}', [HifzController::class, 'update']);
     Route::delete('/hifz-logs/{hifzLog}', [HifzController::class, 'destroy']);
-    Route::get('/hifz-logs', [HifzController::class, 'index']);
+    // Route::get('/hifz-logs', [HifzController::class, 'index']);
     Route::get('/hifz-logs/{hifzLog}', [HifzController::class, 'show']);
+    Route::get('/sheikh/logs', [SheikhController::class, 'getLogs']);
    
     // Review logging
     Route::post('/review-logs', [HifzController::class, 'storeReview']);

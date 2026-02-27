@@ -476,5 +476,132 @@ public function myStudents()
             ]
         ]);
     }
+
+    
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GET LOGS
+// Route: GET /sheikh/logs
+// Params: type (all|hifz|review), search, from_date, to_date, per_page, page
+// ─────────────────────────────────────────────────────────────────────────────
+
+public function getLogs(Request $request): JsonResponse
+{
+    $sheikhId = auth()->id();
+    $type     = $request->get('type', 'all');       // all | hifz | review
+    $search   = $request->get('search', '');
+    $fromDate = $request->get('from_date');          // Y-m-d
+    $toDate   = $request->get('to_date');            // Y-m-d
+    $perPage  = (int) $request->get('per_page', 20);
+
+    // ── Summary counts (not affected by filters) ──────────────────────────
+    $weekStart  = now()->startOfWeek()->toDateString();
+    $monthStart = now()->startOfMonth()->toDateString();
+    $today      = now()->toDateString();
+
+    $hifzThisWeek  = HifzLog::where('sheikh_id', $sheikhId)
+        ->whereDate('date', '>=', $weekStart)->count();
+    $hifzThisMonth = HifzLog::where('sheikh_id', $sheikhId)
+        ->whereDate('date', '>=', $monthStart)->count();
+    $reviewThisWeek  = ReviewLog::where('sheikh_id', $sheikhId)
+        ->whereDate('date', '>=', $weekStart)->count();
+    $reviewThisMonth = ReviewLog::where('sheikh_id', $sheikhId)
+        ->whereDate('date', '>=', $monthStart)->count();
+
+    // ── Build hifz query ──────────────────────────────────────────────────
+    $hifzQuery = HifzLog::where('sheikh_id', $sheikhId)
+        ->with(['student', 'course'])
+        ->when($search, function ($q) use ($search) {
+            $q->whereHas('student', fn($s) => $s->where('name', 'like', "%$search%"))
+              ->orWhere('start_sura', 'like', "%$search%");
+        })
+        ->when($fromDate, fn($q) => $q->whereDate('date', '>=', $fromDate))
+        ->when($toDate,   fn($q) => $q->whereDate('date', '<=', $toDate));
+
+    // ── Build review query ────────────────────────────────────────────────
+    $reviewQuery = ReviewLog::where('sheikh_id', $sheikhId)
+        ->with(['student'])
+        ->when($search, function ($q) use ($search) {
+            $q->whereHas('student', fn($s) => $s->where('name', 'like', "%$search%"))
+              ->orWhere('surah', 'like', "%$search%");
+        })
+        ->when($fromDate, fn($q) => $q->whereDate('date', '>=', $fromDate))
+        ->when($toDate,   fn($q) => $q->whereDate('date', '<=', $toDate));
+
+    // ── Merge based on type filter ────────────────────────────────────────
+    $hifzLogs   = ($type === 'review') ? collect() : $hifzQuery->get();
+    $reviewLogs = ($type === 'hifz')   ? collect() : $reviewQuery->get();
+
+    // Normalise to a unified shape
+    $hifzMapped = $hifzLogs
+        ->filter(fn($l) => $l->student !== null)
+        ->map(fn($l) => [
+            'id'           => $l->id,
+            'type'         => 'hifz',
+            'student_id'   => $l->student->id,
+            'student_name' => $l->student->name,
+            'surah_name'   => $l->start_sura,
+            'from_ayah'    => $l->start_ayah,
+            'to_ayah'      => $l->end_ayah,
+            'date'         => $l->date instanceof \Carbon\Carbon
+                                ? $l->date->toDateString()
+                                : $l->date,
+            'course_id'    => $l->course?->id   ?? 0,
+            'course_name'  => $l->course?->name ?? 'غير محدد',
+            'created_at'   => $l->created_at,
+        ]);
+
+    $reviewMapped = $reviewLogs
+        ->filter(fn($l) => $l->student !== null)
+        ->map(fn($l) => [
+            'id'           => $l->id,
+            'type'         => 'review',
+            'student_id'   => $l->student->id,
+            'student_name' => $l->student->name,
+            'surah_name'   => $l->surah,
+            'from_ayah'    => $l->start_ayah,
+            'to_ayah'      => $l->end_ayah,
+            'date'         => $l->date instanceof \Carbon\Carbon
+                                ? $l->date->toDateString()
+                                : $l->date,
+            'course_id'    => 0,
+            'course_name'  => $l->course?->name ??'مراجعة عامة',
+            'created_at'   => $l->created_at,
+        ]);
+
+    // Merge → sort by date desc → manual paginate
+    $allLogs = $hifzMapped->merge($reviewMapped)
+        ->sortByDesc('date')
+        ->sortByDesc('created_at')
+        ->values();
+
+    $total       = $allLogs->count();
+    $currentPage = (int) $request->get('page', 1);
+    $paginated   = $allLogs->forPage($currentPage, $perPage)->values();
+
+    return response()->json([
+        'success' => true,
+        'data'    => [
+            'summary' => [
+                'hifz_this_week'    => $hifzThisWeek,
+                'hifz_this_month'   => $hifzThisMonth,
+                'review_this_week'  => $reviewThisWeek,
+                'review_this_month' => $reviewThisMonth,
+                'total_this_week'   => $hifzThisWeek  + $reviewThisWeek,
+                'total_this_month'  => $hifzThisMonth + $reviewThisMonth,
+            ],
+            'logs'       => $paginated,
+            'pagination' => [
+                'total'        => $total,
+                'per_page'     => $perPage,
+                'current_page' => $currentPage,
+                'last_page'    => (int) ceil($total / $perPage),
+                'has_more'     => $currentPage < ceil($total / $perPage),
+            ],
+        ],
+    ]);
+}
+
+
 }
 
