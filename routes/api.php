@@ -100,7 +100,7 @@ Route::middleware('role:sheikh')->prefix('sheikh')->group(function () {
     Route::delete('/hifz-logs/{hifzLog}', [HifzController::class, 'destroy']);
     Route::get('/hifz-logs', [HifzController::class, 'index']);
     Route::get('/hifz-logs/{hifzLog}', [HifzController::class, 'show']);
-    Route::get('/logs/detials', [SheikhController::class, 'getLogs']);
+    Route::get('/logs/details', [SheikhController::class, 'getLogs']);
    
     // Review logging
     Route::post('/review-logs', [HifzController::class, 'storeReview']);
