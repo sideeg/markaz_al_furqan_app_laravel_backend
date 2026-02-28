@@ -525,7 +525,7 @@ public function getLogs(Request $request): JsonResponse
         ->with(['student'])
         ->when($search, function ($q) use ($search) {
             $q->whereHas('student', fn($s) => $s->where('name', 'like', "%$search%"))
-              ->orWhere('surah', 'like', "%$search%");
+              ->orWhere('start_sura', 'like', "%$search%");
         })
         ->when($fromDate, fn($q) => $q->where(DB::raw('`session_date`'), '>=', $fromDate))
         ->when($toDate,   fn($q) => $q->where(DB::raw('`session_date`'), '<=', $toDate));
@@ -560,7 +560,7 @@ public function getLogs(Request $request): JsonResponse
             'type'         => 'review',
             'student_id'   => $l->student->id,
             'student_name' => $l->student->name,
-            'surah_name'   => $l->surah,
+            'surah_name'   => $l->start_sura,
             'from_ayah'    => $l->start_ayah,
             'to_ayah'      => $l->end_ayah,
             'date'         => $l->date instanceof \Carbon\Carbon
