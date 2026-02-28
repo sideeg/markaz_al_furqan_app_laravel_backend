@@ -502,13 +502,13 @@ public function getLogs(Request $request): JsonResponse
     $today      = now()->toDateString();
 
     $hifzThisWeek  = HifzLog::where('sheikh_id', $sheikhId)
-        ->where(DB::raw('`date`'), '>=', $weekStart)->count();
+        ->where(DB::raw('`session_date`'), '>=', $weekStart)->count();
     $hifzThisMonth = HifzLog::where('sheikh_id', $sheikhId)
-        ->where(DB::raw('`date`'), '>=', $monthStart)->count();
+        ->where(DB::raw('`session_date`'), '>=', $monthStart)->count();
     $reviewThisWeek  = ReviewLog::where('sheikh_id', $sheikhId)
-        ->where(DB::raw('`date`'), '>=', $weekStart)->count();
+        ->where(DB::raw('`session_date`'), '>=', $weekStart)->count();
     $reviewThisMonth = ReviewLog::where('sheikh_id', $sheikhId)
-        ->where(DB::raw('`date`'), '>=', $monthStart)->count();
+        ->where(DB::raw('`session_date`'), '>=', $monthStart)->count();
 
     // ── Build hifz query ──────────────────────────────────────────────────
     $hifzQuery = HifzLog::where('sheikh_id', $sheikhId)
@@ -517,8 +517,8 @@ public function getLogs(Request $request): JsonResponse
             $q->whereHas('student', fn($s) => $s->where('name', 'like', "%$search%"))
               ->orWhere('start_sura', 'like', "%$search%");
         })
-        ->when($fromDate, fn($q) => $q->where(DB::raw('`date`'), '>=', $fromDate))
-        ->when($toDate,   fn($q) => $q->where(DB::raw('`date`'), '<=', $toDate));
+        ->when($fromDate, fn($q) => $q->where(DB::raw('`session_date`'), '>=', $fromDate))
+        ->when($toDate,   fn($q) => $q->where(DB::raw('`session_date`'), '<=', $toDate));
 
     // ── Build review query ────────────────────────────────────────────────
     $reviewQuery = ReviewLog::where('sheikh_id', $sheikhId)
@@ -527,8 +527,8 @@ public function getLogs(Request $request): JsonResponse
             $q->whereHas('student', fn($s) => $s->where('name', 'like', "%$search%"))
               ->orWhere('surah', 'like', "%$search%");
         })
-        ->when($fromDate, fn($q) => $q->where(DB::raw('`date`'), '>=', $fromDate))
-        ->when($toDate,   fn($q) => $q->where(DB::raw('`date`'), '<=', $toDate));
+        ->when($fromDate, fn($q) => $q->where(DB::raw('`session_date`'), '>=', $fromDate))
+        ->when($toDate,   fn($q) => $q->where(DB::raw('`session_date`'), '<=', $toDate));
 
     // ── Merge based on type filter ────────────────────────────────────────
     $hifzLogs   = ($type === 'review') ? collect() : $hifzQuery->get();

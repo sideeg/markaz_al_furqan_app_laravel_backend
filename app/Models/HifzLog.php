@@ -13,7 +13,7 @@ class HifzLog extends Model
         'student_id',
         'sheikh_id',
         'course_id',
-        'date',
+        'session_date',
         'start_sura',
         'start_ayah',
         'end_sura',
