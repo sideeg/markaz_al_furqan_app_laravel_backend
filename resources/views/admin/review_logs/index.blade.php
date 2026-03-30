@@ -156,7 +156,7 @@
                                 </a>
                                 
                                 {{-- Edit (NEW: allows changing session date) ✅ --}}
-                                <a href="{{ route('admin.review_logs.edit', $log) }}" 
+                                <a href="{{ route('admin.admin.review_logs.edit', $log) }}" 
                                    class="btn btn-sm btn-warning" 
                                    title="تعديل">
                                     <i class="fas fa-edit"></i>
