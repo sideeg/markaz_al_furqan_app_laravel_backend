@@ -77,7 +77,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->group(function () {
     Route::resource('review_logs', ReviewLogController::class)->only([
-        'index', 'show', 'destroy'
+        'index', 'show', 'destroy','edit', 'update'
     ]);
 });
 
