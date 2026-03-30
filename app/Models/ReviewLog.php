@@ -4,10 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ReviewLog extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes; 
+
+   
 
     protected $fillable = [
         'student_id',
@@ -22,6 +25,13 @@ class ReviewLog extends Model
         'end_ayah',
         'evaluation',
         'notes',
+    ];
+        protected $casts = [
+        'session_date' => 'date',
+        'session_time' => 'string',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+        'deleted_at' => 'datetime',  
     ];
 
     public function student()

@@ -162,6 +162,37 @@ class User extends Authenticatable
         return $this->hasMany(ReviewLog::class, 'sheikh_id');
     }
 
+
+    /**
+     * Get this user's notifications
+     */
+    public function notifications()
+    {
+        return $this->belongsToMany(Notification::class, 'user_notifications')
+                    ->withPivot(['is_read', 'read_at'])
+                    ->withTimestamps()
+                    ->orderBy('user_notifications.created_at', 'desc');
+    }
+
+    /**
+     * Get unread notifications count
+     */
+    public function getUnreadNotificationsCountAttribute(): int
+    {
+        return $this->notifications()
+                    ->wherePivot('is_read', false)
+                    ->count();
+    }
+
+    /**
+     * Get unread notifications
+     */
+    public function unreadNotifications()
+    {
+        return $this->notifications()
+                    ->wherePivot('is_read', false);
+    }
+
     /**
      * Get notifications sent by this user.
      */

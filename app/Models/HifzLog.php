@@ -4,10 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;  
 
 class HifzLog extends Model
 {
-    use HasFactory;
+        use HasFactory, SoftDeletes;  
+
+    
 
     protected $fillable = [
         'student_id',
@@ -15,12 +18,21 @@ class HifzLog extends Model
         'course_id',
         'group_id',
         'session_date',
+        'session_time', 
         'start_surah',
         'start_ayah',
         'end_surah',
         'end_ayah',
         'evaluation',
-        'comment'
+        'notes'
+    ];
+
+        protected $casts = [
+        'session_date' => 'date',
+        'session_time' => 'string',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+        'deleted_at' => 'datetime',  
     ];
 
     public function student()
