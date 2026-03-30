@@ -43,4 +43,35 @@ class ReviewLog extends Model
     {
         return $this->belongsTo(User::class, 'sheikh_id');
     }
+    /**
+     * Get the course
+     */
+    public function course()
+    {
+        return $this->belongsTo(Course::class);
+    }
+ 
+    /**
+     * Get the group (if applicable)
+     */
+    public function group()
+    {
+        return $this->belongsTo(Group::class);
+    }
+ 
+    /**
+     * Scope: Only active (not soft-deleted)
+     */
+    public function scopeActive($query)
+    {
+        return $query->whereNull('deleted_at');
+    }
+ 
+    /**
+     * Scope: Only deleted (soft-deleted)
+     */
+    public function scopeDeleted($query)
+    {
+        return $query->whereNotNull('deleted_at');
+    }
 }
