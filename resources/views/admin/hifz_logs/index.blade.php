@@ -14,7 +14,9 @@
                 <select name="course_id" class="form-select">
                     <option value="">-- اختر الدورة --</option>
                     @foreach($courses as $course)
-                        <option value="{{ $course->id }}" {{ request('course_id') == $course->id ? 'selected' : '' }}>{{ $course->name }}</option>
+                        <option value="{{ $course->id }}" {{ request('course_id') == $course->id ? 'selected' : '' }}>
+                            {{ $course->name }}
+                        </option>
                     @endforeach
                 </select>
             </div>
@@ -22,7 +24,9 @@
                 <select name="sheikh_id" class="form-select">
                     <option value="">-- اختر الشيخ --</option>
                     @foreach($sheikhs as $sheikh)
-                        <option value="{{ $sheikh->id }}" {{ request('sheikh_id') == $sheikh->id ? 'selected' : '' }}>{{ $sheikh->name }}</option>
+                        <option value="{{ $sheikh->id }}" {{ request('sheikh_id') == $sheikh->id ? 'selected' : '' }}>
+                            {{ $sheikh->name }}
+                        </option>
                     @endforeach
                 </select>
             </div>
@@ -30,12 +34,14 @@
                 <select name="student_id" class="form-select">
                     <option value="">-- اختر الطالب --</option>
                     @foreach($students as $student)
-                        <option value="{{ $student->id }}" {{ request('student_id') == $student->id ? 'selected' : '' }}>{{ $student->name }}</option>
+                        <option value="{{ $student->id }}" {{ request('student_id') == $student->id ? 'selected' : '' }}>
+                            {{ $student->name }}
+                        </option>
                     @endforeach
                 </select>
             </div>
             <div class="col-md-3">
-                <input type="text" name="sura" class="form-control" placeholder="اسم السورة" value="{{ request('sura') }}">
+                <input type="text" name="surah" class="form-control" placeholder="اسم السورة" value="{{ request('surah') }}">
             </div>
             <div class="col-md-3">
                 <input type="date" name="start_date" class="form-control" value="{{ request('start_date') }}">
@@ -71,14 +77,47 @@
                 <tbody>
                     @forelse($logs as $log)
                     <tr>
-                        <td>{{ $log->date }}</td>
-                        <td>{{ $log->student?->name }}</td>
-                        <td>{{ $log->sheikh?->name }}</td>
-                        <td>{{ $log->course?->name }}</td>
+                        {{-- ✅ FIXED: Changed to session_date --}}
+                        <td>{{ $log->session_date?->format('Y-m-d') ?? 'غير محدد' }}</td>
+                        
+                        <td>{{ $log->student?->name ?? 'محذوف' }}</td>
+                        <td>{{ $log->sheikh?->name ?? 'محذوف' }}</td>
+                        
+                        {{-- ✅ NOW SHOWS COURSE (with soft-deleted courses) --}}
+                        <td>
+                            {{ $log->course?->name ?? 'محذوفة من النظام' }}
+                            @if($log->course?->deleted_at)
+                                <span class="badge bg-warning ms-2">محذوفة</span>
+                            @endif
+                        </td>
+                        
                         <td>{{ $log->start_surah }}:{{ $log->start_ayah }}</td>
-                        <td>{{ $log->end_surah  }}:{{ $log->end_ayah }}</td>
-                        <td>{{ ucfirst($log->evaluation) }}</td>
-                        <td>{{ $log->comment }}</td>
+                        <td>{{ $log->end_surah }}:{{ $log->end_ayah }}</td>
+                        <td>
+                            <span class="badge bg-info">
+                                @switch($log->evaluation)
+                                    @case('excellent')
+                                        ممتاز
+                                        @break
+                                    @case('very_good')
+                                        جيد جداً
+                                        @break
+                                    @case('good')
+                                        جيد
+                                        @break
+                                    @case('needs_improvement')
+                                        يحتاج تحسين
+                                        @break
+                                    @case('poor')
+                                        ضعيف
+                                        @break
+                                @endswitch
+                            </span>
+                        </td>
+                        
+                        {{-- ✅ FIXED: Changed to notes --}}
+                        <td>{{ $log->notes ?? '-' }}</td>
+                        
                         <td class="d-flex gap-1">
                             <a href="{{ route('admin.hifz_logs.show', $log) }}" class="btn btn-sm btn-info">عرض</a>
                             <form action="{{ route('admin.hifz_logs.destroy', $log) }}" method="POST" onsubmit="return confirm('هل أنت متأكد من حذف هذا السجل؟')">

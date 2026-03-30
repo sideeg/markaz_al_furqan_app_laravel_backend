@@ -17,7 +17,7 @@ class HifzLogController extends Controller
         $sheikhs = User::withRole('sheikh')->get();
         $students = User::withRole('student')->get();
 
-        $query = HifzLog::query()->with(['student', 'sheikh', 'course']);
+        $query = HifzLog::query()->with(['student', 'sheikh', 'course'=> fn($q) => $q->withTrashed()]);
 
         if ($request->filled('course_id')) {
             $query->where('course_id', $request->course_id);
@@ -47,6 +47,7 @@ class HifzLogController extends Controller
 
     public function show(HifzLog $hifzLog)
     {
+         $hifzLog = $hifzLog->load(['student', 'sheikh', 'course' => fn($q) => $q->withTrashed()]);
         return view('admin.hifz_logs.show', compact('hifzLog'));
     }
 

@@ -31,7 +31,7 @@ class ReviewLogController extends Controller
         $students = User::withRole('student')->active()->get();
 
         // Start query with ReviewLog (NOT HifzLog) ✅ FIXED
-        $query = ReviewLog::query()->with(['student', 'sheikh', 'course']);
+        $query = ReviewLog::query()->with(['student', 'sheikh', 'course'=> fn($q) => $q->withTrashed()]);
 
         // Apply filters
         if ($request->filled('course_id')) {
@@ -74,7 +74,7 @@ class ReviewLogController extends Controller
      */
     public function show(ReviewLog $review_log)
     {
-        $log = $review_log->load(['student', 'sheikh', 'course']);
+        $log = $review_log->load(['student', 'sheikh', 'course' => fn($q) => $q->withTrashed()]);
         return view('admin.review_logs.show', compact('log'));
     }
 
