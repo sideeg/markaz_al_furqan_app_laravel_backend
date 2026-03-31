@@ -11,6 +11,7 @@ use Illuminate\Validation\Rule;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
+use App\Models\AdminActivityLog;
  
 
 class AdminController extends Controller
@@ -95,7 +96,15 @@ class AdminController extends Controller
             abort(404);
         }
 
-        $admin->load(['roles', 'createdCourses', 'sentNotifications']);
+
+        $admin->load([
+            'roles', 
+            'createdCourses', 
+            'sentNotifications', 
+            'activities' => function($query) {
+                $query->latest()->take(5);
+            }
+        ]);
 
         return view('admin.admins.show', compact('admin'));
     }
@@ -216,24 +225,129 @@ class AdminController extends Controller
         return back()->with('success', $status);
     }
     
-    /**
-     * Show admin's activity log.
+        /**
+     * Show admin's activity log (UPDATED - Now shows REAL data)
      */
     public function activity(User $admin)
     {
-        if (!$admin->isAdmin() ) {
+        // Verify admin exists and is actually an admin
+        if (!$admin->isAdmin()) {
             abort(404);
         }
-
-        // In a real application, you would fetch actual activity logs
-        $activities = [
-            ['action' => 'أنشأ دورة جديدة', 'target' => 'دورة الفرقان', 'time' => '2023-06-25 14:30'],
-            ['action' => 'قام بتحديث', 'target' => 'مسجد الرحمة', 'time' => '2023-06-24 10:15'],
-            ['action' => 'أرسل إشعار', 'target' => 'لجميع الطلاب', 'time' => '2023-06-23 16:45'],
-            ['action' => 'عيّن شيخًا', 'target' => 'الشيخ أحمد', 'time' => '2023-06-22 09:20'],
-            ['action' => 'صدر تقرير', 'target' => 'تقرير الحفظ الشهري', 'time' => '2023-06-21 11:30'],
-        ];
-
+ 
+        // Fetch real activity logs for this admin
+        // Paginate to avoid loading huge amounts of data
+        $activities = AdminActivityLog::byAdmin($admin->id)
+            ->newest()
+            ->paginate(20);
+ 
+        // Return view with real data
         return view('admin.admins.activity', compact('admin', 'activities'));
+    }
+ 
+    /**
+     * Optional: Get recent activity across all admins
+     */
+    public function recentActivity(Request $request)
+    {
+        $query = AdminActivityLog::newest();
+ 
+        // Filter by action if provided
+        if ($request->filled('action')) {
+            $query->byAction($request->action);
+        }
+ 
+        // Filter by admin if provided
+        if ($request->filled('admin_id')) {
+            $query->byAdmin($request->admin_id);
+        }
+ 
+        // Filter by model type if provided
+        if ($request->filled('model_type')) {
+            $query->byModelType($request->model_type);
+        }
+ 
+        // Filter by date range if provided
+        if ($request->filled('from_date') && $request->filled('to_date')) {
+            $query->betweenDates($request->from_date, $request->to_date);
+        }
+ 
+        $activities = $query->paginate(20);
+        $admins = User::role('admin')->get();
+ 
+        return view('admin.admins.recent-activity', compact('activities', 'admins'));
+    }
+ 
+    /**
+     * Optional: Show only important activities (creates, deletes, approvals)
+     */
+    public function importantActivity(User $admin)
+    {
+        if (!$admin->isAdmin()) {
+            abort(404);
+        }
+ 
+        $activities = AdminActivityLog::byAdmin($admin->id)
+            ->importantActions()
+            ->newest()
+            ->paginate(20);
+ 
+        return view('admin.admins.activity', compact('admin', 'activities'));
+    }
+ 
+    /**
+     * Optional: Search activities
+     */
+    public function searchActivity(Request $request, User $admin)
+    {
+        if (!$admin->isAdmin()) {
+            abort(404);
+        }
+ 
+        $search = $request->input('q', '');
+ 
+        $activities = AdminActivityLog::byAdmin($admin->id)
+            ->where(function ($query) use ($search) {
+                $query->where('model_name', 'like', "%{$search}%")
+                      ->orWhere('description', 'like', "%{$search}%")
+                      ->orWhere('action', 'like', "%{$search}%");
+            })
+            ->newest()
+            ->paginate(20);
+ 
+        return view('admin.admins.activity', compact('admin', 'activities'));
+    }
+ 
+        /**
+         * Optional: Export activities as CSV
+         */
+        public function exportActivity(User $admin)
+    {
+        $activities = AdminActivityLog::byAdmin($admin->id)->newest()->get();
+        
+        $callback = function() use ($activities) {
+            $file = fopen('php://output', 'w');
+            // Add BOM for Excel UTF-8 Arabic support
+            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+            
+            fputcsv($file, ['التاريخ', 'الوقت', 'النشاط', 'الهدف', 'النوع', 'الوصف']);
+
+            foreach ($activities as $activity) {
+                fputcsv($file, [
+                    $activity->created_at->format('Y-m-d'),
+                    $activity->created_at->format('H:i:s'),
+                    $activity->action_label,
+                    $activity->model_name,
+                    $activity->model_type_label, // Use the Arabic label accessor
+                    $activity->description,
+                ]);
+            }
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="activity.csv"',
+        ]);
     }
 }

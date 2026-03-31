@@ -88,6 +88,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/notifications/{notification}', [NotificationController::class, 'show'])->name('admin.notifications.show');
     Route::get('/notifications/{notification}/edit', [NotificationController::class, 'edit'])->name('admin.notifications.edit');
     Route::put('/notifications/{notification}', [NotificationController::class, 'update'])->name('admin.notifications.update');
+    
 });
 Route::prefix('students')->middleware(['auth', 'role:admin|supervisor'])->group(function () {
     Route::get('/', [StudentController::class, 'index'])->name('admin.students.index');
@@ -132,6 +133,8 @@ Route::prefix('admin')->group(function() {
 
     Route::get('admins/{admin}/activity', [\App\Http\Controllers\Admin\AdminController::class, 'activity'])
         ->name('admin.admins.activity');
+    Route::get('/admin/activity/export', [AdminController::class, 'exportActivity'])->name('admin.admins.activity.export');
+
 
     Route::patch('admins/{admin}/toggle-status', [\App\Http\Controllers\Admin\AdminController::class, 'toggleStatus'])
         ->name('admin.admins.toggle-status');

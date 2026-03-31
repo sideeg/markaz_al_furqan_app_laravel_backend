@@ -318,5 +318,14 @@ class User extends Authenticatable
 
         return round($totalScore / $logs->count(), 2);
     }
+
+    
+    /**
+     * Get the activity logs for this admin.
+     */
+    public function activities()
+    {
+        return $this->hasMany(AdminActivityLog::class, 'admin_id');
+    }
 }
 

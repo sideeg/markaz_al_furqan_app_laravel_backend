@@ -135,77 +135,44 @@
                 </div>
                 
                 <ul class="timeline">
-                    <li class="timeline-item">
-                        <div class="timeline-badge bg-primary">
-                            <i class="fas fa-book"></i>
-                        </div>
-                        <div class="timeline-panel">
-                            <div class="timeline-heading">
-                                <h5 class="timeline-title">أنشأ دورة جديدة</h5>
-                                <p class="text-muted"><small>منذ 2 ساعة</small></p>
-                            </div>
-                            <div class="timeline-body">
-                                <p>دورة الفرقان المتقدمة في التجويد</p>
-                            </div>
-                        </div>
-                    </li>
-                    <li class="timeline-item">
-                        <div class="timeline-badge bg-success">
-                            <i class="fas fa-user-plus"></i>
-                        </div>
-                        <div class="timeline-panel">
-                            <div class="timeline-heading">
-                                <h5 class="timeline-title">أضاف مدير جديد</h5>
-                                <p class="text-muted"><small>منذ 1 يوم</small></p>
-                            </div>
-                            <div class="timeline-body">
-                                <p>تمت إضافة المدير أحمد محمد</p>
-                            </div>
-                        </div>
-                    </li>
-                    <li class="timeline-item">
-                        <div class="timeline-badge bg-info">
-                            <i class="fas fa-bell"></i>
-                        </div>
-                        <div class="timeline-panel">
-                            <div class="timeline-heading">
-                                <h5 class="timeline-title">أرسل إشعار</h5>
-                                <p class="text-muted"><small>منذ 3 أيام</small></p>
-                            </div>
-                            <div class="timeline-body">
-                                <p>إشعار ببدء التسجيل في الدورة الصيفية</p>
-                            </div>
-                        </div>
-                    </li>
-                    <li class="timeline-item">
-                        <div class="timeline-badge bg-warning">
-                            <i class="fas fa-mosque"></i>
-                        </div>
-                        <div class="timeline-panel">
-                            <div class="timeline-heading">
-                                <h5 class="timeline-title">قام بتحديث مسجد</h5>
-                                <p class="text-muted"><small>منذ 4 أيام</small></p>
-                            </div>
-                            <div class="timeline-body">
-                                <p>تحديث معلومات مسجد الرحمة</p>
-                            </div>
-                        </div>
-                    </li>
-                    <li class="timeline-item">
-                        <div class="timeline-badge bg-danger">
-                            <i class="fas fa-file-export"></i>
-                        </div>
-                        <div class="timeline-panel">
-                            <div class="timeline-heading">
-                                <h5 class="timeline-title">صدر تقرير</h5>
-                                <p class="text-muted"><small>منذ 5 أيام</small></p>
-                            </div>
-                            <div class="timeline-body">
-                                <p>تقرير الحفظ الشهري لشهر يونيو</p>
-                            </div>
-                        </div>
-                    </li>
-                </ul>
+    @forelse($admin->activities as $activity)
+        @php
+            // Map actions to icons and colors
+            $config = match($activity->action) {
+                'create' => ['icon' => 'fa-plus', 'color' => 'bg-success'],
+                'update' => ['icon' => 'fa-edit', 'color' => 'bg-info'],
+                'delete' => ['icon' => 'fa-trash', 'color' => 'bg-danger'],
+                'send_notification' => ['icon' => 'fa-bell', 'color' => 'bg-primary'],
+                'approve_enrollment' => ['icon' => 'fa-check-circle', 'color' => 'bg-success'],
+                'reject_enrollment' => ['icon' => 'fa-times-circle', 'color' => 'bg-warning'],
+                'assign_sheikh' => ['icon' => 'fa-user-tie', 'color' => 'bg-secondary'],
+                default => ['icon' => 'fa-tasks', 'color' => 'bg-dark'],
+            };
+        @endphp
+
+        <li class="timeline-item">
+            <div class="timeline-badge {{ $config['color'] }}">
+                <i class="fas {{ $config['icon'] }}"></i>
+            </div>
+            <div class="timeline-panel">
+                <div class="timeline-heading">
+                    <h5 class="timeline-title">{{ $activity->action_label }}</h5>
+                    <p class="text-muted">
+                        <small><i class="fas fa-clock me-1"></i> {{ $activity->created_at->diffForHumans() }}</small>
+                    </p>
+                </div>
+                <div class="timeline-body">
+                    <p>{{ $activity->description }}</p>
+                </div>
+            </div>
+        </li>
+    @empty
+        <div class="text-center py-4 text-muted">
+            <i class="fas fa-history fa-3x mb-3 opacity-20"></i>
+            <p>لا يوجد نشاط مسجل لهذا المدير حتى الآن</p>
+        </div>
+    @endforelse
+</ul>
             </div>
         </div>
         
@@ -266,12 +233,12 @@
         bottom: 0;
         width: 2px;
         background: #e9ecef;
-        left: 25px;
-        margin-left: -1.5px;
+        right: 25px; /* Changed from left to right for RTL */
+        margin-right: -1px;
     }
     
     .timeline-item {
-        margin-bottom: 20px;
+        margin-bottom: 30px;
         position: relative;
     }
     
@@ -279,31 +246,39 @@
         position: absolute;
         width: 50px;
         height: 50px;
-        left: 0;
+        right: 0; /* Changed from left to right */
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
         color: white;
-        z-index: 100;
+        z-index: 10;
+        box-shadow: 0 0 0 4px #fff;
     }
     
     .timeline-panel {
-        margin-left: 70px;
-        background: white;
+        margin-right: 70px; /* Changed from margin-left */
+        margin-left: 0;
+        background: #f8f9fa;
         border-radius: 8px;
         padding: 15px;
         position: relative;
-        box-shadow: 0 1px 6px rgba(0,0,0,0.1);
     }
-    
+
     .timeline-panel:before {
         content: '';
         position: absolute;
         top: 15px;
-        left: -15px;
+        right: -10px; /* Pointer on the right side */
         border-style: solid;
-        border-width: 15px 15px 15px 0;
-        border-color: transparent white transparent transparent;
+        border-width: 10px 0 10px 10px;
+        border-color: transparent transparent transparent #f8f9fa;
+    }
+
+    .timeline-title {
+        margin-top: 0;
+        color: inherit;
+        font-size: 1rem;
+        font-weight: 700;
     }
 </style>
