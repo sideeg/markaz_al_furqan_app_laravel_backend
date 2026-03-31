@@ -71,7 +71,7 @@ Route::resource('mosques', MosqueManagementController::class);
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->group(function () {
     Route::resource('hifz_logs', HifzLogController::class)->only([
-        'index', 'show', 'destroy'
+        'index', 'show', 'destroy','edit', 'update'
     ]);
 });
 
