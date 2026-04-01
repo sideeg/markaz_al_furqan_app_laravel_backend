@@ -10,9 +10,70 @@
 </div>
 
 <div class="card shadow-sm border-0">
-    <div class="card-header bg-light d-flex justify-content-between align-items-center">
-        <h5 class="mb-0"><i class="fas fa-list-ul me-2"></i> جميع الطلاب</h5>
+    <div class="card-header bg-light">
+        <h5 class="mb-0"><i class="fas fa-filter me-2"></i> تصفية وبحث</h5>
     </div>
+    
+    <div class="card-body border-bottom bg-light bg-opacity-50">
+        {{-- SEARCH AND FILTER FORM --}}
+        <form action="{{ route('admin.students.index') }}" method="GET" class="row g-3 align-items-end">
+            
+            {{-- Search Bar --}}
+            <div class="col-md-3">
+                <label class="form-label small fw-bold">بحث عام</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-white"><i class="fas fa-search"></i></span>
+                    <input type="text" name="search" class="form-control" placeholder="الاسم، الإيميل، الهاتف..." value="{{ request('search') }}">
+                </div>
+            </div>
+
+            {{-- Gender Filter --}}
+            <div class="col-md-2">
+                <label class="form-label small fw-bold">الجنس</label>
+                <select name="gender" class="form-select">
+                    <option value="">الكل</option>
+                    <option value="ذكر" {{ request('gender') == 'ذكر' ? 'selected' : '' }}>ذكر</option>
+                    <option value="أنثي" {{ request('gender') == 'أنثي' ? 'selected' : '' }}>أنثى</option>
+                </select>
+            </div>
+
+            {{-- Qiraat Filter --}}
+            <div class="col-md-2">
+                <label class="form-label small fw-bold">القراءة</label>
+                <select name="qiraat" class="form-select">
+                    <option value="">الكل</option>
+                    @foreach(config('qiraat.types') as $qiraat)
+                        <option value="{{ $qiraat }}" {{ request('qiraat') == $qiraat ? 'selected' : '' }}>
+                            {{ $qiraat }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            {{-- Status Filter --}}
+            <div class="col-md-2">
+                <label class="form-label small fw-bold">الحالة</label>
+                <select name="status" class="form-select">
+                    <option value="">الكل</option>
+                    <option value="1" {{ request('status') === '1' ? 'selected' : '' }}>نشط</option>
+                    <option value="0" {{ request('status') === '0' ? 'selected' : '' }}>معطل</option>
+                </select>
+            </div>
+
+            {{-- Action Buttons --}}
+            <div class="col-md-3 d-flex gap-2">
+                <button type="submit" class="btn btn-primary flex-grow-1">
+                    <i class="fas fa-filter me-1"></i> تصفية
+                </button>
+                @if(request()->anyFilled(['search', 'gender', 'qiraat', 'status']))
+                    <a href="{{ route('admin.students.index') }}" class="btn btn-outline-danger" title="إلغاء الفلاتر">
+                        <i class="fas fa-times"></i>
+                    </a>
+                @endif
+            </div>
+        </form>
+    </div>
+
     <div class="card-body">
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
@@ -41,20 +102,26 @@
                                 </div>
                             @endif
                         </td>
-                        <td>{{ $student->name }}</td>
+                        <td>
+                            <strong>{{ $student->name }}</strong>
+                            @if($student->national_id)
+                                <div class="text-muted small">{{ $student->national_id }}</div>
+                            @endif
+                        </td>
                         <td>{{ $student->email }}</td>
-                        <td>{{ $student->phone }}</td>
-                        <td> @if($student->gender)
-                            <span class="badge {{ $student->gender == 'ذكر' ? 'bg-info text-dark' : 'bg-warning text-dark' }}">
-                                {{ $student->gender }}
-                            </span>
+                        <td>{{ $student->phone ?? '—' }}</td>
+                        <td>
+                            @if($student->gender)
+                                <span class="badge {{ $student->gender == 'ذكر' ? 'bg-info text-dark' : 'bg-warning text-dark' }}">
+                                    {{ $student->gender }}
+                                </span>
                             @else
                                 <span class="text-muted">—</span>
                             @endif
                         </td>
-                        <td>{{ $student->qiraat }}</td>
+                        <td>{{ $student->qiraat ?? '—' }}</td>
                         <td>
-                            <span class="badge bg-info text-dark">{{ $student->enrolledCourses->count() }}</span>
+                            <span class="badge bg-primary rounded-pill">{{ $student->enrolledCourses->count() }}</span>
                         </td>
                         <td>
                             <form action="{{ route('admin.students.toggle-status', $student) }}" method="POST" class="d-inline">
@@ -79,14 +146,24 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="8" class="text-center text-muted py-4">لا يوجد طلاب لعرضهم.</td>
+                        <td colspan="9" class="text-center text-muted py-5">
+                            <i class="fas fa-search fa-3x mb-3 text-light"></i>
+                            <h5>لا يوجد طلاب لعرضهم</h5>
+                            <p>جرب تغيير إعدادات التصفية أو أضف طالباً جديداً.</p>
+                        </td>
                     </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
-        <div class="mt-3">
-            {{ $students->links() }}
+        
+        <div class="d-flex justify-content-between align-items-center mt-4">
+            <div class="text-muted small">
+                عرض <strong>{{ $students->count() }}</strong> من أصل <strong>{{ $students->total() }}</strong> طلاب
+            </div>
+            <div>
+                {{ $students->links() }}
+            </div>
         </div>
     </div>
 </div>

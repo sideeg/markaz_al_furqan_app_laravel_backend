@@ -14,21 +14,42 @@
 </div>
 
 <div class="admin-card">
-    <div class="card-header">
-        <h5>قائمة المشايخ</h5>
-        <div class="d-flex">
-            <div class="form-check form-switch me-3">
-                <input class="form-check-input" type="checkbox" id="activeFilter" checked>
-                <label class="form-check-label" for="activeFilter">النشطين فقط</label>
-            </div>
-            <div class="input-group" style="width: 300px;">
-                <input type="text" class="form-control" placeholder="بحث عن شيخ...">
-                <button class="btn btn-outline-primary" type="button">
-                    <i class="fas fa-search"></i>
-                </button>
-            </div>
+   <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+    <h5 class="mb-0">قائمة المشايخ</h5>
+    
+    {{-- Wrapped in a FORM pointing to the index route --}}
+    <form action="{{ route('admin.sheikhs.index') }}" method="GET" class="d-flex align-items-center mb-0">
+        
+        {{-- Active Filter Toggle --}}
+        <div class="form-check form-switch ms-3 mb-0 d-flex align-items-center">
+            {{-- In RTL, we use ms (margin-start) instead of me (margin-end) --}}
+            <input class="form-check-input ms-2" type="checkbox" id="activeFilter" 
+                   name="active_only" value="1" 
+                   onchange="this.form.submit()" 
+                   {{ request('active_only') ? 'checked' : '' }}
+                   style="margin-top: 0; cursor: pointer;">
+            <label class="form-check-label mb-0" for="activeFilter" style="cursor: pointer;">النشطين فقط</label>
         </div>
-    </div>
+
+        {{-- Search Input Group --}}
+        <div class="input-group" style="min-width: 300px;">
+            <input type="text" name="search" class="form-control" 
+                   placeholder="بحث بالاسم، الإيميل، الهاتف..." 
+                   value="{{ request('search') }}">
+            
+            <button class="btn btn-outline-primary" type="submit">
+                <i class="fas fa-search"></i>
+            </button>
+            
+            {{-- Show Reset Button ONLY if a search or filter is active --}}
+            @if(request()->has('search') || request()->has('active_only'))
+                <a href="{{ route('admin.sheikhs.index') }}" class="btn btn-outline-danger" title="إلغاء التصفية">
+                    <i class="fas fa-times"></i>
+                </a>
+            @endif
+        </div>
+    </form>
+</div>
     
     <div class="card-body">
         <div class="table-responsive">

@@ -11,9 +11,42 @@ use App\Http\Controllers\Controller;
 
 class StudentController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $students = User::role('student')->latest()->paginate(10);
+        // 1. Start with only students
+        $query = User::role('student');
+
+        // 2. Search by Name, Email, or Phone
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                ->orWhere('email', 'like', "%{$search}%")
+                ->orWhere('phone', 'like', "%{$search}%")
+                ->orWhere('national_id', 'like', "%{$search}%");
+            });
+        }
+
+        // 3. Filter by Gender
+        if ($request->filled('gender')) {
+            $query->where('gender', $request->gender);
+        }
+
+        // 4. Filter by Qiraat
+        if ($request->filled('qiraat')) {
+            $query->where('qiraat', $request->qiraat);
+        }
+
+        // 5. Filter by Status (Active/Inactive)
+        // We use strict matching here because '0' (inactive) is considered empty in PHP if we just check ->filled() without care in some older Laravel versions, but filled() handles '0' correctly in modern Laravel.
+        if ($request->has('status') && $request->status !== '') {
+            $query->where('is_active', (bool) $request->status);
+        }
+
+        // 6. Execute with Pagination and preserve query strings
+        $students = $query->latest()->paginate(15);
+        $students->appends($request->query());
+
         return view('admin.students.index', compact('students'));
     }
 
@@ -46,7 +79,7 @@ class StudentController extends Controller
 
         if ($validator->fails()) {
             return redirect()->back()
-                ->withErrors($validator, 'student')
+                ->withErrors($validator)
                 ->withInput();
         }
 

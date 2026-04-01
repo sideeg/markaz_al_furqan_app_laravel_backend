@@ -19,14 +19,32 @@ class AdminController extends Controller
     /**
      * Display a listing of admin users.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $admins = User::with('roles')
-            ->whereHas('roles', function ($query) {
-                $query->whereIn('name', ['admin', 'super_admin']);
-            })
-            ->latest()
-            ->paginate(20);
+        // 1. Base query: Only get users with admin roles
+        $query = User::with('roles')
+            ->whereHas('roles', function ($q) {
+                $q->whereIn('name', ['admin', 'super_admin']);
+            });
+
+        // 2. Search by Name, Email, or Phone
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('phone', 'like', "%{$search}%");
+            });
+        }
+
+        // 3. Filter by Active Status
+        if ($request->has('active_only')) {
+            $query->where('is_active', true);
+        }
+
+        // 4. Execute with pagination
+        $admins = $query->latest()->paginate(20);
+        $admins->appends($request->query());
 
         return view('admin.admins.index', compact('admins'));
     }

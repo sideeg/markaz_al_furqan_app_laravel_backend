@@ -20,7 +20,7 @@
     
     <div class="card-body">
         <!-- Filters -->
-        <form method="GET" class="row mb-4">
+        <form action="{{ route('admin.enrollments.index') }}" method="GET" class="row mb-4">
             <div class="col-md-3 mb-2">
                 <label class="form-label">الدورة</label>
                 <select class="form-select" name="course_id">

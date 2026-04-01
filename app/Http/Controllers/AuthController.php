@@ -207,16 +207,6 @@ class AuthController extends Controller
     public function adminDashboard()
     {
         $this->authorize('admin');
-        
-        // $totalUsers = User::count();
-        // $totalStudents = User::whereHas('roles', function($q) { $q->where('name', 'student'); })->count();
-        // $totalSheikhs = User::whereHas('roles', function($q) { $q->where('name', 'sheikh'); })->count();
-        // $activeUsers = User::where('is_active', true)->count();
-
-        // return view('dashboards.admin', compact(
-        //     'totalUsers', 'totalStudents', 'totalSheikhs', 'activeUsers'
-        // ));
-
         // 1. Admin Info
         $adminName = auth()->user()->name;
         $arabicDate = Carbon::now()->locale('ar')->isoFormat('dddd، D MMMM Y');
@@ -225,19 +215,19 @@ class AuthController extends Controller
         $stats = [
             'studentsCount' => [
                 'count' => User::whereHas('roles', function($q) { $q->where('name', 'student'); })->count(),
-                'growth' => '+5.6%'
+                
             ],
             'sheikhsCount' => [
                 'count' => User::whereHas('roles', function($q) { $q->where('name', 'sheikh'); })->count(),
-                'growth' => '+2.3%'
+                
             ],
             'coursesCount' => [
                 'count' => Course::count(),
-                'growth' => '+8.1%'
+                
             ],
             'activeCoursesCount' => [
                 'count' => Course::where('is_active', true)->count(),
-                'growth' => '+3.4%'
+                
             ],
         ];
 
@@ -248,23 +238,35 @@ class AuthController extends Controller
             ->get(['id', 'name', 'type', 'is_registration_open', 'start_date']);
 
         // 4. Recent HifzLog Logs (last 5)
+        // 4. Recent HifzLog Logs (last 5)
         $recentHifzLog = HifzLog::with(['student:id,name', 'sheikh:id,name'])
             ->latest()
             ->take(5)
             ->get()
             ->map(function ($item) {
-                // Convert numeric evaluation to stars (1-5)
-                $stars = str_repeat('★', (int)$item->evaluation);
-                $stars .= str_repeat('☆', 5 - (int)$item->evaluation);
-
+                // Map string evaluations to integers (fallback to 3 if unknown)
+                $evaluationMap = [
+                    'excellent' => 5,
+                    'very_good' => 4,
+                    'good' => 3,
+                    'needs_improvement' => 2,
+                    'poor' => 1,
+                ];
                 
+                // Check if it's already a number, otherwise map the string
+                $rating = is_numeric($item->evaluation) 
+                    ? (int) $item->evaluation 
+                    : ($evaluationMap[$item->evaluation] ?? 3);
+
                 return [
                     'id' => $item->id,
-                    'student_name' => $item->student->name,
-                    'sheikh_name' => $item->sheikh->name,
-                    'date' => $item->session_date,
-                    'stars' => $stars,
-                    
+                    // Use ?-> to prevent crashes if the user was deleted
+                    'student_name' => $item->student?->name ?? 'مستخدم محذوف', 
+                    'sheikh_name' => $item->sheikh?->name ?? 'مستخدم محذوف',
+                    // Format the date neatly
+                    'date' => $item->session_date ? $item->session_date->format('Y/m/d') : '—',
+                    // Pass the raw number, not the star characters
+                    'rating' => $rating, 
                 ];
             });
 

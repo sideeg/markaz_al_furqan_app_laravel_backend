@@ -41,6 +41,8 @@ class EnrollmentController extends Controller
             ->latest()
             ->paginate(20);
 
+        $enrollments->appends($request->query());
+
         // Get filter options
         $courses = Course::where('is_registration_open', true)->get();
         $students = User::withRole('student')->get();

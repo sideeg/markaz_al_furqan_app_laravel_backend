@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\HifzLog;
 use App\Models\ReviewLog;
 use App\Models\Course;
+use App\Models\Group;
 
 class HifzController extends Controller
 {
@@ -73,6 +74,22 @@ class HifzController extends Controller
 
     public function store(Request $request)
     {
+        $course = Course::find($request->course_id);
+        if (!$course) {
+            return response()->json([
+                'error' => 'الدورة المختارة محذوفة أو غير موجودة'
+            ], 422);
+        }
+
+        // ✅ Validate group belongs to course
+        $group = Group::where('id', $request->group_id)
+                    ->where('course_id', $request->course_id)
+                    ->first();
+        if (!$group) {
+            return response()->json([
+                'error' => 'المجموعة غير مرتبطة بهذه الدورة'
+            ], 422);
+        }
         $log = new HifzLog();
         $log->student_id = $request->student_id;
         $log->group_id = $request->group_id;

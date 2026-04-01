@@ -15,12 +15,37 @@ class SheikhController extends Controller
     /**
      * Display a listing of sheikhs.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $sheikhs = User::with('teachingCourses', 'teachingGroups')
-            ->withRole('sheikh')
-            ->latest()
-            ->paginate(20);
+        
+
+        // Start the query 
+        $query = User::role('sheikh');
+            
+
+        // 1. Handle the Search Filter
+        if ($request->filled('search')) {
+            $search = $request->search;
+            
+            // Use a closure to group the OR conditions together safely
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                ->orWhere('email', 'like', "%{$search}%")
+                ->orWhere('phone', 'like', "%{$search}%")
+                ->orWhere('national_id', 'like', "%{$search}%");
+            });
+        }
+
+        // 2. Handle the Active Only Filter (from the toggle switch)
+        if ($request->filled('active_only')) {
+            $query->where('is_active', true);
+        }
+
+        // Execute query with pagination
+        $sheikhs = $query->latest()->paginate(15);
+
+        // Append search params to pagination links so they don't break when clicking page 2
+        $sheikhs->appends($request->query());
 
         return view('admin.sheikhs.index', compact('sheikhs'));
     }

@@ -725,7 +725,6 @@
                             <p class="stats-label">إجمالي الطلاب</p>
                             <p class="stats-number">{{ $stats['studentsCount']['count'] ?? 0 }}</p>
                             <div class="d-flex justify-content-between align-items-center">
-                                <p class="stats-change text-success mb-0"><i class="fas fa-arrow-up"></i> {{ $stats['studentsCount']['growth'] ?? 0 }} زيادة</p>
                                 <a href="{{ route('admin.students.index') }}" class="view-all-btn">عرض الكل <i class="fas fa-arrow-left"></i></a>
                             </div>
                             <i class="fas fa-users card-icon"></i>
@@ -739,7 +738,6 @@
                             <p class="stats-label">إجمالي الدورات</p>
                             <p class="stats-number">{{ $stats['coursesCount']['count'] ?? 0 }}</p>
                             <div class="d-flex justify-content-between align-items-center">
-                                <p class="stats-change text-success mb-0"><i class="fas fa-arrow-up"></i>{{ $stats['coursesCount']['growth'] ?? 0 }} زيادة</p>
                                 <a href="{{ route('admin.courses.index') }}" class="view-all-btn">عرض الكل <i class="fas fa-arrow-left"></i></a>
                             </div>
                             <i class="fas fa-book card-icon"></i>
@@ -753,7 +751,6 @@
                             <p class="stats-label">إجمالي المشايخ</p>
                             <p class="stats-number">{{ $stats['sheikhsCount']['count'] ?? 0 }}</p>
                             <div class="d-flex justify-content-between align-items-center">
-                                <p class="stats-change text-success mb-0"><i class="fas fa-arrow-up"></i> {{$stats['sheikhsCount']['growth']}} زيادة</p>
                                 <a href="{{ route('admin.sheikhs.index') }}" class="view-all-btn">عرض الكل <i class="fas fa-arrow-left"></i></a>
                             </div>
                             <i class="fas fa-user-tie card-icon"></i>
@@ -767,8 +764,7 @@
                             <p class="stats-label">الدورات النشطة</p>
                             <p class="stats-number">{{ $stats['activeCoursesCount']['count'] ?? 0 }}</p>
                             <div class="d-flex justify-content-between align-items-center">
-                                <p class="stats-change text-danger mb-0"><i class="fas fa-arrow-down"></i> {{ $stats['activeCoursesCount']['growth'] ?? 0 }}% انخفاض</p>
-                                <a href="#" class="view-all-btn">عرض الكل <i class="fas fa-arrow-left"></i></a>
+                                <a href="{{route('admin.courses.index')}}" class="view-all-btn">عرض الكل <i class="fas fa-arrow-left"></i></a>
                             </div>
                             <i class="fas fa-book-open card-icon"></i>
                         </div>
@@ -841,7 +837,7 @@
                         <div class="card-body">
                             <div class="section-header">
                                 <h3 class="section-title"><i class="fas fa-quran"></i> نشاط الحفظ الحديث</h3>
-                                <a href="#" class="view-all-btn">عرض جميع الأنشطة <i class="fas fa-arrow-left"></i></a>
+                                <a href="{{route('admin.hifz_logs.index')}}" class="view-all-btn">عرض جميع الأنشطة <i class="fas fa-arrow-left"></i></a>
                             </div>
                             <div class="table-responsive">
                                 <table class="table table-hover">
@@ -859,12 +855,14 @@
                                             <td>{{ $activity['student_name'] ?? 'طالب' }}</td>
                                             <td>{{ $activity['sheikh_name'] ?? 'شيخ' }}</td>
                                             <td>{{ $activity['date'] ?? '01/01/2023' }}</td>
-                                            <td>
+                                           <td>
                                                 @php
-                                                    $rating = $activity['rating'] ?? 3;
+                                                    // Now $activity['rating'] actually exists!
+                                                    $rating = $activity['rating']; 
                                                     $stars = str_repeat('★', $rating) . str_repeat('☆', 5 - $rating);
                                                 @endphp
-                                                <span class="star-rating">{{ $stars }}</span> ({{ $rating }}/5)
+                                                <span class="star-rating text-warning fs-5">{{ $stars }}</span> 
+                                                <span class="text-muted ms-1">({{ $rating }}/5)</span>
                                             </td>
                                         </tr>
                                         @empty

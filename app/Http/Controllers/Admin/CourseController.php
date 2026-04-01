@@ -14,10 +14,30 @@ class CourseController extends Controller
     /**
      * Display a listing of the courses.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $courses = $courses = Course::latest()->paginate(10); // Fetch all courses with pagination
+        $query = Course::query();
+
+        // 1. Search by name or description
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        // 2. Filter by Active Status (from the toggle switch)
+        if ($request->has('active_only')) {
+            $query->where('is_active', true);
+        }
+
+        // 3. Execute with pagination and preserve queries
+        $courses = $query->latest()->paginate(10);
+        $courses->appends($request->query());
+
         $mosques = Mosque::all();
+        
         return view('admin.courses.index', compact('courses', 'mosques'));
     }
 
@@ -48,17 +68,6 @@ class CourseController extends Controller
      */
     public function store(Request $request)
     {
-        // $request->validate([
-        //     'name' => 'required|string|max:255',
-        //     'description' => 'nullable|string',
-        //     'type' => 'required|in:online,open,closed',
-        //     'image' => 'nullable|image|max:2048',
-        //     'start_date' => 'required|date',
-        //     'end_date' => 'required|date|after_or_equal:start_date',
-        //     'max_students' => 'required|integer|min:1',
-        //     'requirements' => 'nullable|string',
-        //     'schedule_details' => 'nullable|string',
-        // ],[],[],'courses');
 
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',

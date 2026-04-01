@@ -230,12 +230,27 @@
     </div>
 </div>
 
-{{-- Include Select2 JS --}}
+@section('scripts')
+{{-- 1. Ensure jQuery is loaded FIRST if your layout doesn't already have it --}}
+{{-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> --}}
+
+{{-- 2. Include Select2 JS --}}
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <script>
     $(document).ready(function() {
-        // Custom matcher function for better search
+        
+        // Helper function to normalize Arabic text for better searching
+        function normalizeArabic(text) {
+            if (!text) return '';
+            return text
+                .replace(/[أإآ]/g, 'ا')     // Unify Alif
+                .replace(/ة/g, 'ه')         // Unify Taa Marbuta/Haa
+                .replace(/[ًٌٍَُِّْ]/g, '')   // Remove Tashkeel (Harakat)
+                .toLowerCase();             // Handle English chars just in case
+        }
+
+        // Custom matcher function for Arabic Search
         function customMatcher(params, data) {
             // If there are no search terms, return all of the data
             if ($.trim(params.term) === '') {
@@ -247,14 +262,11 @@
                 return null;
             }
 
-            // `params.term` should be the term that is used for searching
-            // `data.text` is the text that is displayed for the data object
-            var term = params.term.toLowerCase();
-            var text = data.text.toLowerCase();
+            // Normalize both the search term and the database text
+            var term = normalizeArabic(params.term);
+            var text = normalizeArabic(data.text);
 
-            // Return `null` if the term should not be displayed
-            // Return the data object if the term should be displayed
-            // Search anywhere in the text, not just at the beginning
+            // Search anywhere in the text
             if (text.indexOf(term) > -1) {
                 return data;
             }
@@ -268,7 +280,7 @@
             placeholder: 'اكتب للبحث... (مثال: علي أحمد)',
             allowClear: true,
             width: '100%',
-            matcher: customMatcher,  // ✅ USE CUSTOM MATCHER
+            matcher: customMatcher,  // Using the Arabic-friendly matcher
             language: {
                 noResults: function() {
                     return 'لم يتم العثور على نتائج';
@@ -280,5 +292,6 @@
         });
     });
 </script>
+@endsection
 
 @endsection

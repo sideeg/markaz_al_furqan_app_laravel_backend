@@ -57,6 +57,7 @@ class SheikhController extends Controller
                 'data' => [
                     'user' => $this->formatUserData($user),
                     'token' => $token,
+                    'minimum_required_version' => '3.0.0',
                 ],
             ]);
 

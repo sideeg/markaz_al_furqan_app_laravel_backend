@@ -3,6 +3,23 @@
 @section('title', 'مجموعة ' . $group->name . ' - ' . $course->name)
 
 @section('content')
+{{-- Include Select2 CSS --}}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+
+<style>
+    /* Styling adjustments for Select2 inside Bootstrap 5 */
+    .select2-container--bootstrap-5 .select2-selection--single {
+        height: 38px;
+        display: flex;
+        align-items: center;
+    }
+    
+    .select2-container--bootstrap-5.select2-container--open .select2-selection--single {
+        border-color: #86b7fe;
+    }
+</style>
+
 <div class="content-header">
     <div class="page-title">
         <i class="fas fa-users"></i>
@@ -19,7 +36,6 @@
 </div>
 
 <div class="row">
-    <!-- Group Details -->
     <div class="col-md-4">
         <div class="admin-card">
             <div class="card-header bg-primary text-white">
@@ -78,10 +94,12 @@
                     @csrf
                     <div class="mb-3">
                         <label class="form-label fw-bold">اختر طالبًا</label>
-                        <select class="form-select" name="student_id" required>
+                        {{-- Added searchable-select class here --}}
+                        <select class="form-select searchable-select" name="student_id" required>
+                            <option value="">-- ابحث بالاسم أو الرقم الوطني --</option>
                             @foreach($availableStudents as $student)
                                 <option value="{{ $student->id }}">
-                                    {{ $student->name }} ({{ $student->national_id }})
+                                    {{ $student->name }} @if($student->national_id) ({{ $student->national_id }}) @endif
                                 </option>
                             @endforeach
                         </select>
@@ -100,7 +118,6 @@
         </div>
     </div>
     
-    <!-- Group Students -->
     <div class="col-md-8">
         <div class="admin-card">
             <div class="card-header bg-primary text-white">
@@ -173,4 +190,53 @@
         </div>
     </div>
 </div>
+@endsection
+
+@section('scripts')
+{{-- Include Select2 JS --}}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<script>
+$(document).ready(function() {
+    // 1. Arabic Text Normalizer for better searching
+    function normalizeArabic(text) {
+        if (!text) return '';
+        return text
+            .replace(/[أإآ]/g, 'ا')
+            .replace(/ة/g, 'ه')
+            .replace(/[ًٌٍَُِّْ]/g, '')
+            .toLowerCase();
+    }
+
+    // 2. Custom Matcher for Select2
+    function customMatcher(params, data) {
+        if ($.trim(params.term) === '') {
+            return data;
+        }
+        if (typeof data.text === 'undefined') {
+            return null;
+        }
+        
+        var term = normalizeArabic(params.term);
+        var text = normalizeArabic(data.text);
+
+        if (text.indexOf(term) > -1) {
+            return data;
+        }
+        return null;
+    }
+
+    // 3. Initialize Select2
+    $('.searchable-select').select2({
+        theme: 'bootstrap-5',
+        width: '100%',
+        matcher: customMatcher,
+        language: {
+            noResults: function() { return 'لم يتم العثور على نتائج'; },
+            searching: function() { return 'جاري البحث...'; }
+        }
+    });
+});
+</script>
 @endsection
