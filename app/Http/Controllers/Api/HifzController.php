@@ -8,6 +8,8 @@ use App\Models\HifzLog;
 use App\Models\ReviewLog;
 use App\Models\Course;
 use App\Models\Group;
+use Illuminate\Support\Facades\Log;
+
 
 class HifzController extends Controller
 {
@@ -232,10 +234,15 @@ class HifzController extends Controller
         ])->setStatusCode(200, 'Review log updated successfully');
     }
 
-    public function destroyReview(ReviewLog $log)
+    public function destroyReview(HifzLog $log,int $logId)
     {
-        if ($log->sheikh_id != auth()->user()->id) {
-            return response()->json(['error' => 'Unauthorized'], 401);
+        
+        
+        $log = ReviewLog::find($logId);
+        
+        // If the log is not found, return a 404 error
+        if (!$log) {
+            return response()->json(['error' => 'Log not found'], 404);
         }
         $log->delete();
         return response()->json(['message' => 'Deleted successfully']);
