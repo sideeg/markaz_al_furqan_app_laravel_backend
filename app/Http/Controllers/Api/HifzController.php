@@ -97,8 +97,8 @@ class HifzController extends Controller
         $log->group_id = $request->group_id;
         $log->sheikh_id = $request->sheikh_id; // Assuming group_id is provided
         $log->course_id = $request->course_id;
-        $log->session_date = Date('Y-m-d' );
-        $log->session_time = Date('H:i:s');
+        $log->session_date = $request->session_date ?? date('Y-m-d');
+        $log->session_time = $request->session_time ?? date('H:i:s');
         $log->start_surah = $request->start_surah;
         $log->end_surah = $request->end_surah;
         $log->start_ayah = $request->start_ayah;
@@ -141,6 +141,12 @@ class HifzController extends Controller
         if ($log->sheikh_id != auth()->user()->id) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
+        if ($request->has('session_date')) {
+        $log->session_date = $request->session_date;
+        }
+        if ($request->has('session_time')) {
+            $log->session_time = $request->session_time;
+        }
         
         $log->start_surah = $request->start_surah;
         $log->end_surah = $request->end_surah;
@@ -182,13 +188,14 @@ class HifzController extends Controller
 
     public function storeReview(Request $request)
     {
+        Log::info($request->all());
         $log = new ReviewLog();
         $log->student_id = $request->student_id;
         $log->group_id = $request->group_id;
         $log->sheikh_id = $request->sheikh_id; // Assuming group_id is provided
         $log->course_id = $request->course_id;
-        $log->session_date = Date('Y-m-d');
-        $log->session_time = Date('H:i:s');
+         $log->session_date = $request->session_date ?? date('Y-m-d');  // ✅ FIX
+        $log->session_time = $request->session_time ?? date('H:i:s');  // ✅ FIX
         $log->start_surah = $request->start_surah;
         $log->end_surah = $request->end_surah;
         $log->start_ayah = $request->start_ayah;
@@ -215,6 +222,13 @@ class HifzController extends Controller
         // Check if the log belongs to the authenticated user
         if ($log->sheikh_id != auth()->user()->id) {
             return response()->json(['error' => 'Unauthorized'], 401);
+        }
+        Log::info($request->all());
+        if ($request->has('session_date')) {
+        $log->session_date = $request->session_date;
+        }
+        if ($request->has('session_time')) {
+            $log->session_time = $request->session_time;
         }
         
         $log->start_surah = $request->start_surah;
