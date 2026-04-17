@@ -63,15 +63,15 @@ class SheikhController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'phone' => 'required|unique:users,phone',
-            'national_id' => 'required|unique:users,national_id',
-            'qiraat' => 'required|string|max:50',
-            'profile_image' => 'nullable|image|max:2048',
-            'password' => 'required|min:8|confirmed',
-        ]);
+        $request->validateWithBag('sheikh', [
+        'name' => 'required|string|max:255',
+        'email' => 'required|email|unique:users,email',
+        'phone' => 'required|unique:users,phone',
+        'national_id' => 'required|unique:users,national_id',
+        'qiraat' => 'required|string|max:50',
+        'profile_image' => 'nullable|image|max:2048',
+        'password' => 'required|min:8|confirmed',
+    ]);
 
         $imagePath = null;
         if ($request->hasFile('profile_image')) {
@@ -93,8 +93,7 @@ class SheikhController extends Controller
         $sheikhRole = Role::findByName('sheikh');
         $sheikh->assignRole($sheikhRole);
 
-        return redirect()->route('admin.sheikhs.index')
-            ->with('success', 'تمت إضافة الشيخ بنجاح');
+        return redirect()->route('admin.sheikhs.index')->with('success', 'تمت إضافة الشيخ بنجاح');
     }
 
     /**

@@ -982,87 +982,87 @@
     </script>
 
    <!-- Sheikh Modal -->
-<div class="modal fade" id="addSheikhModal" tabindex="-1" aria-labelledby="addSheikhModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <form method="POST" action="{{ route('admin.sheikhs.store') }}" enctype="multipart/form-data">
-      @csrf
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">إضافة شيخ جديد</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
+<div class="modal fade @if($errors->hasBag('sheikh')) show d-block @endif" id="addSheikhModal" tabindex="-1" aria-labelledby="addSheikhModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form method="POST" action="{{ route('admin.sheikhs.store') }}" enctype="multipart/form-data">
+            @csrf
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">إضافة شيخ جديد</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" 
+                        @if($errors->hasBag('sheikh')) onclick="window.location.reload()" @endif></button>
+                </div>
+                <div class="modal-body">
+                    @if($errors->hasBag('sheikh') && $errors->sheikh->any())
+                        <div class="alert alert-danger">
+                            <ul class="mb-0">
+                                @foreach ($errors->sheikh->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
 
-        <div class="modal-body">
-          <input type="text" name="name"
-                 class="form-control mb-2 @error('name') is-invalid @enderror"
-                 placeholder="اسم الشيخ" value="{{ old('name') }}" required>
-          @error('name')
-            <div class="invalid-feedback d-block">{{ $message }}</div>
-          @enderror
+                    <input type="text" name="name" class="form-control mb-2 @error('name', 'sheikh') is-invalid @enderror" placeholder="اسم الشيخ" value="{{ old('name') }}" required>
+                    @error('name', 'sheikh')
+                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                    @enderror
 
-          <input type="email" name="email"
-                 class="form-control mb-2 @error('email') is-invalid @enderror"
-                 placeholder="البريد الإلكتروني" value="{{ old('email') }}" required>
-          @error('email')
-            <div class="invalid-feedback d-block">{{ $message }}</div>
-          @enderror
+                    <input type="email" name="email" class="form-control mb-2 @error('email', 'sheikh') is-invalid @enderror" placeholder="البريد الإلكتروني" value="{{ old('email') }}" required>
+                    @error('email', 'sheikh')
+                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                    @enderror
 
-          <input type="text" name="phone"
-                 class="form-control mb-2 @error('phone') is-invalid @enderror"
-                 placeholder="رقم الهاتف" value="{{ old('phone') }}">
-          @error('phone')
-            <div class="invalid-feedback d-block">{{ $message }}</div>
-          @enderror
+                    <input type="text" name="phone" class="form-control mb-2 @error('phone', 'sheikh') is-invalid @enderror" placeholder="رقم الهاتف" value="{{ old('phone') }}">
+                    @error('phone', 'sheikh')
+                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                    @enderror
 
-          <input type="text" name="national_id"
-                 class="form-control mb-2 @error('national_id') is-invalid @enderror"
-                 placeholder="الرقم الوطني" value="{{ old('national_id') }}">
-          @error('national_id')
-            <div class="invalid-feedback d-block">{{ $message }}</div>
-          @enderror
+                    <input type="text" name="national_id" class="form-control mb-2 @error('national_id', 'sheikh') is-invalid @enderror" placeholder="الرقم الوطني" value="{{ old('national_id') }}">
+                    @error('national_id', 'sheikh')
+                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                    @enderror
 
-          <select name="qiraat" class="form-control mb-2 @error('qiraat') is-invalid @enderror">
-    <option value="">اختر القراءة</option>
-    @foreach(config('qiraat.types') as $qiraat)
-        <option value="{{ $qiraat }}" {{ old('qiraat', $user->qiraat ?? '') == $qiraat ? 'selected' : '' }}>
-            {{ $qiraat }}
-        </option>
-    @endforeach
-</select>
-@error('qiraat')
-    <div class="invalid-feedback">{{ $message }}</div>
-@enderror
-<select name="gender" class="form-control mb-2 @error('gender') is-invalid @enderror">
-    <option value="">اختر الجنس</option>
-    <option value="ذكر" {{ old('gender') == 'ذكر' ? 'selected' : '' }}>ذكر</option>
-    <option value="أنثي" {{ old('gender') == 'أنثي' ? 'selected' : '' }}>أنثي</option>
-</select>
-@error('gender')
-    <div class="invalid-feedback d-block">{{ $message }}</div>
-@enderror
-          <input type="file" name="profile_image"
-                 class="form-control mb-2 @error('profile_image') is-invalid @enderror">
-          @error('profile_image')
-            <div class="invalid-feedback d-block">{{ $message }}</div>
-          @enderror
+                    <select name="qiraat" class="form-control mb-2 @error('qiraat', 'sheikh') is-invalid @enderror">
+                        <option value="">اختر القراءة</option>
+                        @foreach(config('qiraat.types') as $qiraat)
+                            <option value="{{ $qiraat }}" {{ old('qiraat') == $qiraat ? 'selected' : '' }}>
+                                {{ $qiraat }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('qiraat', 'sheikh')
+                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                    @enderror
 
-          <input type="password" name="password"
-                 class="form-control mb-2 @error('password') is-invalid @enderror"
-                 placeholder="كلمة المرور" required>
-          @error('password')
-            <div class="invalid-feedback d-block">{{ $message }}</div>
-          @enderror
+                    <select name="gender" class="form-control mb-2 @error('gender', 'sheikh') is-invalid @enderror">
+                        <option value="">اختر الجنس</option>
+                        <option value="ذكر" {{ old('gender') == 'ذكر' ? 'selected' : '' }}>ذكر</option>
+                        <option value="أنثي" {{ old('gender') == 'أنثي' ? 'selected' : '' }}>أنثي</option>
+                    </select>
+                    @error('gender', 'sheikh')
+                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                    @enderror
 
-          <input type="password" name="password_confirmation"
-                 class="form-control mb-2" placeholder="تأكيد كلمة المرور" required>
-        </div>
+                    <label class="form-label small text-muted">الصورة الشخصية</label>
+                    <input type="file" name="profile_image" class="form-control mb-2 @error('profile_image', 'sheikh') is-invalid @enderror">
+                    @error('profile_image', 'sheikh')
+                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                    @enderror
 
-        <div class="modal-footer">
-          <button type="submit" class="btn btn-success">حفظ</button>
-        </div>
-      </div>
-    </form>
-  </div>
+                    <input type="password" name="password" class="form-control mb-2 @error('password', 'sheikh') is-invalid @enderror" placeholder="كلمة المرور" required>
+                    @error('password', 'sheikh')
+                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                    @enderror
+
+                    <input type="password" name="password_confirmation" class="form-control mb-2" placeholder="تأكيد كلمة المرور" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">إضافة الشيخ</button>
+                </div>
+            </div>
+        </form>
+    </div>
 </div>
 
 @if ($errors->any())
@@ -1132,7 +1132,7 @@
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title">إضافة مدير جديد</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @if($errors->hasBag('admin')) onclick="window.location.reload()" @endif></button>
         </div>
         <div class="modal-body">
           @if($errors->hasBag('admin') && $errors->admin->any())
@@ -1205,18 +1205,20 @@
             <div class="alert alert-danger">{{ session('error') }}</div>
           @endif
 
-          @if($errors->any())
-            <div class="alert alert-danger">
-              <ul class="mb-0">
-                @foreach ($errors->all() as $error)
-                  <li>{{ $error }}</li>
+         @if($errors->hasBag('notification') && $errors->notification->any())
+        <div class="alert alert-danger">
+            <ul class="mb-0">
+                @foreach ($errors->notification->all() as $error)
+                    <li>{{ $error }}</li>
                 @endforeach
-              </ul>
-            </div>
-          @endif
+            </ul>
+        </div>
+    @endif
 
-          <input type="text" name="title" class="form-control mb-2" placeholder="عنوان الإشعار" value="{{ old('title') }}" required>
-          
+<input type="text" name="title" class="form-control mb-2 @error('title', 'notification') is-invalid @enderror" placeholder="عنوان الإشعار" value="{{ old('title') }}" required>
+    @error('title', 'notification')
+        <div class="invalid-feedback d-block">{{ $message }}</div>
+    @enderror          
           <textarea name="message" class="form-control mb-2" placeholder="محتوى الإشعار" required>{{ old('message') }}</textarea>
           
           <select name="target" class="form-control mb-2">

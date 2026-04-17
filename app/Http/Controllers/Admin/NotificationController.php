@@ -40,37 +40,34 @@ class NotificationController extends Controller
      * POST /admin/notifications
      * Store a new broadcast notification
      */
-    public function store(Request $request)
-    {
-        // ✅ Validate
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'message' => 'required|string',
-            'target' => 'required|in:students,teachers,both',
-        ]);
+   public function store(Request $request)
+{
+    // ✅ Validate using a specific error bag
+    $validated = $request->validateWithBag('notification', [
+        'title' => 'required|string|max:255',
+        'message' => 'required|string',
+        'target' => 'required|in:students,teachers,both',
+    ]);
 
-        try {
-           
-            
-            $notification = $this->notificationService->createAndSendNotification(
-                auth()->user()->id,
-                $validated['title'],
-                $validated['message'],
+    try {
+        $notification = $this->notificationService->createAndSendNotification(
+            auth()->user()->id,
+            $validated['title'],
+            $validated['message'],
+            'custom_broadcast',
+            $validated['target']
+        );
 
-                'custom_broadcast',
-                $validated['target']  // 'students' | 'teachers' | 'both'
-            );
-
-            return back()->with('success', 'تم إرسال الإشعار بنجاح! ✓');
-            
-        } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Notification broadcast error: ' . $e->getMessage());
-            
-            return back()
-                ->with('error', 'حدث خطأ أثناء إرسال الإشعار: ' . $e->getMessage())
-                ->withInput();
-        }
+        return back()->with('success', 'تم إرسال الإشعار بنجاح! ✓');
+        
+    } catch (\Exception $e) {
+        \Illuminate\Support\Facades\Log::error('Notification broadcast error: ' . $e->getMessage());
+        
+        return back()
+            ->withErrors($e->getMessage(), 'notification') // Also send exceptions to the same bag
+            ->withInput();
     }
+}
 
     public function show($id){
         $notification = Notification::findOrFail($id);

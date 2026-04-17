@@ -1,6 +1,5 @@
 {{-- UPDATED ADMIN ACTIVITY LOG VIEW --}}
 {{-- File: resources/views/admin/admins/activity.blade.php --}}
-{{-- Shows REAL activity data instead of fake data --}}
 
 @extends('layouts.admin')
 @section('title', 'سجل نشاط المدير: ' . $admin->name)
@@ -13,52 +12,15 @@
         font-size: 12px;
         font-weight: 600;
     }
-
-    .badge-create {
-        background-color: #d4edda;
-        color: #155724;
-    }
-
-    .badge-update {
-        background-color: #cce5ff;
-        color: #004085;
-    }
-
-    .badge-delete {
-        background-color: #f8d7da;
-        color: #721c24;
-    }
-
-    .badge-notification {
-        background-color: #fff3cd;
-        color: #856404;
-    }
-
-    .badge-approval {
-        background-color: #d1ecf1;
-        color: #0c5460;
-    }
-
-    .time-ago {
-        color: #6c757d;
-        font-size: 12px;
-    }
-
-    .activity-details {
-        font-size: 13px;
-        color: #495057;
-        margin-top: 4px;
-    }
-
-    .no-data {
-        text-align: center;
-        padding: 40px;
-        color: #6c757d;
-    }
-
-    .search-box {
-        max-width: 300px;
-    }
+    .badge-create { background-color: #d4edda; color: #155724; }
+    .badge-update { background-color: #cce5ff; color: #004085; }
+    .badge-delete { background-color: #f8d7da; color: #721c24; }
+    .badge-notification { background-color: #fff3cd; color: #856404; }
+    .badge-approval { background-color: #d1ecf1; color: #0c5460; }
+    .time-ago { color: #6c757d; font-size: 12px; }
+    .activity-details { font-size: 13px; color: #495057; margin-top: 4px; }
+    .no-data { text-align: center; padding: 40px; color: #6c757d; }
+    .search-box { max-width: 300px; }
 </style>
 
 <div class="content-header">
@@ -177,68 +139,6 @@
                             @endif
                         </td>
                     </tr>
-
-                    {{-- Details Modal --}}
-                    @if($activity->old_data || $activity->new_data)
-                    <div class="modal fade" id="detailsModal{{ $activity->id }}" tabindex="-1">
-                        <div class="modal-dialog modal-lg">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title">تفاصيل النشاط</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <p><strong>الوصف:</strong> {{ $activity->description }}</p>
-                                    <p><strong>الوقت:</strong> {{ $activity->created_at->format('Y-m-d H:i:s') }}</p>
-                                    <p><strong>عنوان IP:</strong> {{ $activity->ip_address ?? 'N/A' }}</p>
-
-                                    @if($activity->old_data)
-                                    <div class="mt-3">
-                                        <h6>القيم القديمة:</h6>
-                                        <pre class="bg-light p-2 rounded">{{ json_encode($activity->old_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
-                                    </div>
-                                    @endif
-
-                                    @if($activity->new_data)
-                                    <div class="mt-3">
-                                        <h6>القيم الجديدة:</h6>
-                                        <pre class="bg-light p-2 rounded">{{ json_encode($activity->new_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
-                                    </div>
-                                    @endif
-
-                                    @if($activity->action === 'update' && $activity->old_data && $activity->new_data)
-                                    <div class="mt-3">
-                                        <h6>التغييرات:</h6>
-                                        <table class="table table-sm">
-                                            <thead>
-                                                <tr>
-                                                    <th>الحقل</th>
-                                                    <th>القيمة القديمة</th>
-                                                    <th>القيمة الجديدة</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @foreach($activity->getChanges() as $field => $change)
-                                                <tr>
-                                                    <td><strong>{{ $field }}</strong></td>
-                                                    <td><small>{{ $change['old'] ?? '-' }}</small></td>
-                                                    <td><small>{{ $change['new'] ?? '-' }}</small></td>
-                                                </tr>
-                                                @endforeach
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                    @endif
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                        إغلاق
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    @endif
                     @endforeach
                 </tbody>
             </table>
@@ -259,5 +159,71 @@
         @endif
     </div>
 </div>
+
+{{-- ✅ THE FIX: We generate all the Modals down here, safely OUTSIDE of the table-responsive div --}}
+@if($activities->count() > 0)
+    @foreach($activities as $activity)
+        @if($activity->old_data || $activity->new_data)
+        <div class="modal fade" id="detailsModal{{ $activity->id }}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">تفاصيل النشاط</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p><strong>الوصف:</strong> {{ $activity->description }}</p>
+                        <p><strong>الوقت:</strong> {{ $activity->created_at->format('Y-m-d H:i:s') }}</p>
+                        <p><strong>عنوان IP:</strong> {{ $activity->ip_address ?? 'N/A' }}</p>
+
+                        @if($activity->old_data)
+                        <div class="mt-3">
+                            <h6>القيم القديمة:</h6>
+                            <pre class="bg-light p-2 rounded" style="direction: ltr; text-align: left;">{{ json_encode($activity->old_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
+                        </div>
+                        @endif
+
+                        @if($activity->new_data)
+                        <div class="mt-3">
+                            <h6>القيم الجديدة:</h6>
+                            <pre class="bg-light p-2 rounded" style="direction: ltr; text-align: left;">{{ json_encode($activity->new_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
+                        </div>
+                        @endif
+
+                        @if($activity->action === 'update' && $activity->old_data && $activity->new_data)
+                        <div class="mt-3">
+                            <h6>التغييرات:</h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-bordered">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>الحقل</th>
+                                            <th>القيمة القديمة</th>
+                                            <th>القيمة الجديدة</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($activity->getChanges() as $field => $change)
+                                        <tr>
+                                            <td><strong>{{ $field }}</strong></td>
+                                            <td><small>{{ is_array($change['old']) ? json_encode($change['old'], JSON_UNESCAPED_UNICODE) : ($change['old'] ?? '-') }}</small></td>
+                                            <td><small>{{ is_array($change['new']) ? json_encode($change['new'], JSON_UNESCAPED_UNICODE) : ($change['new'] ?? '-') }}</small></td>
+                                        </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        @endif
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
+    @endforeach
+@endif
 
 @endsection

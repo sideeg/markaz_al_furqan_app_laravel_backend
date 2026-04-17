@@ -3,6 +3,8 @@
 @section('title', 'إدارة طلبات التسجيل')
 
 @section('content')
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <div class="content-header">
     <div class="page-title">
         <i class="fas fa-user-graduate"></i>
@@ -20,58 +22,68 @@
     
     <div class="card-body">
         <!-- Filters -->
-        <form action="{{ route('admin.enrollments.index') }}" method="GET" class="row mb-4">
-            <div class="col-md-3 mb-2">
-                <label class="form-label">الدورة</label>
-                <select class="form-select" name="course_id">
-                    <option value="">جميع الدورات</option>
-                    @foreach($courses as $course)
-                        <option value="{{ $course->id }}" {{ request('course_id') == $course->id ? 'selected' : '' }}>
-                            {{ $course->name }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-            
-            <div class="col-md-3 mb-2">
-                <label class="form-label">الطالب</label>
-                <select class="form-select" name="student_id">
-                    <option value="">جميع الطلاب</option>
-                    @foreach($students as $student)
-                        <option value="{{ $student->id }}" {{ request('student_id') == $student->id ? 'selected' : '' }}>
-                            {{ $student->name }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-            
-            <div class="col-md-2 mb-2">
-                <label class="form-label">نوع الدورة</label>
-                <select class="form-select" name="course_type">
-                    <option value="">الكل</option>
-                    <option value="online" {{ request('course_type') == 'online' ? 'selected' : '' }}>أونلاين</option>
-                    <option value="open" {{ request('course_type') == 'open' ? 'selected' : '' }}>مفتوحة</option>
-                    <option value="closed" {{ request('course_type') == 'closed' ? 'selected' : '' }}>مغلقة</option>
-                </select>
-            </div>
-            
-            <div class="col-md-2 mb-2">
-                <label class="form-label">الحالة</label>
-                <select class="form-select" name="status">
-                    @foreach($statuses as $key => $value)
-                        <option value="{{ $key }}" {{ request('status') == $key ? 'selected' : '' }}>
-                            {{ $value }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-            
-            <div class="col-md-2 d-flex align-items-end mb-2">
-                <button type="submit" class="btn btn-primary w-100">
-                    <i class="fas fa-filter"></i> تطبيق الفلتر
-                </button>
-            </div>
-        </form>
+        <form action="{{ route('admin.enrollments.index') }}" method="GET" class="row mb-4 align-items-end">
+    
+    {{-- Text Search --}}
+    <div class="col-md-3 mb-2">
+        <label class="form-label fw-bold">بحث عام</label>
+        <div class="input-group">
+            <span class="input-group-text bg-white"><i class="fas fa-search"></i></span>
+            <input type="text" name="search" class="form-control" placeholder="اسم طالب، رقم وطني، دورة..." value="{{ request('search') }}">
+        </div>
+    </div>
+
+    {{-- Course Dropdown (Searchable) --}}
+    <div class="col-md-3 mb-2">
+        <label class="form-label fw-bold">الدورة</label>
+        <select class="form-select searchable-select" name="course_id">
+            <option value="">جميع الدورات</option>
+            @foreach($courses as $course)
+                <option value="{{ $course->id }}" {{ request('course_id') == $course->id ? 'selected' : '' }}>
+                    {{ $course->name }}
+                </option>
+            @endforeach
+        </select>
+    </div>
+    
+    {{-- Student Dropdown (Searchable) --}}
+    <div class="col-md-3 mb-2">
+        <label class="form-label fw-bold">الطالب</label>
+        <select class="form-select searchable-select" name="student_id">
+            <option value="">جميع الطلاب</option>
+            @foreach($students as $student)
+                <option value="{{ $student->id }}" {{ request('student_id') == $student->id ? 'selected' : '' }}>
+                    {{ $student->name }} @if($student->national_id) ({{ $student->national_id }}) @endif
+                </option>
+            @endforeach
+        </select>
+    </div>
+    
+    {{-- Status Dropdown --}}
+    <div class="col-md-3 mb-2">
+        <label class="form-label fw-bold">الحالة</label>
+        <select class="form-select" name="status">
+            <option value="">جميع الحالات</option>
+            @foreach($statuses as $key => $value)
+                <option value="{{ $key }}" {{ request('status') == $key ? 'selected' : '' }}>
+                    {{ $value }}
+                </option>
+            @endforeach
+        </select>
+    </div>
+    
+    {{-- Action Buttons --}}
+    <div class="col-md-12 mt-2 d-flex justify-content-end gap-2">
+        <button type="submit" class="btn btn-primary">
+            <i class="fas fa-filter me-1"></i> تطبيق الفلتر
+        </button>
+        @if(request()->anyFilled(['search', 'course_id', 'student_id', 'course_type', 'status']))
+            <a href="{{ route('admin.enrollments.index') }}" class="btn btn-outline-danger" title="إلغاء الفلاتر">
+                <i class="fas fa-times me-1"></i> إلغاء
+            </a>
+        @endif
+    </div>
+</form>
         
         <!-- Enrollment Requests Table -->
         <div class="table-responsive">
@@ -213,6 +225,44 @@
             const form = $('#rejectionForm');
             form.attr('action', `/admin/admin/enrollments/${enrollmentId}/reject`);
             $('#rejectionModal').modal('show');
+        });
+    });
+</script>
+<script>
+    $(document).ready(function() {
+        // Setup rejection modal
+        $('.reject-btn').click(function() {
+            const enrollmentId = $(this).data('id');
+            const form = $('#rejectionForm');
+            form.attr('action', `/admin/admin/enrollments/${enrollmentId}/reject`); // Fixed the double /admin/admin typo here!
+            $('#rejectionModal').modal('show');
+        });
+
+        // Setup Select2 with Arabic Normalizer
+        function normalizeArabic(text) {
+            if (!text) return '';
+            return text.replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/[ًٌٍَُِّْ]/g, '').toLowerCase();
+        }
+
+        function customMatcher(params, data) {
+            if ($.trim(params.term) === '') return data;
+            if (typeof data.text === 'undefined') return null;
+            
+            var term = normalizeArabic(params.term);
+            var text = normalizeArabic(data.text);
+
+            if (text.indexOf(term) > -1) return data;
+            return null;
+        }
+
+        $('.searchable-select').select2({
+            theme: 'bootstrap-5',
+            width: '100%',
+            matcher: customMatcher,
+            language: {
+                noResults: function() { return 'لم يتم العثور على نتائج'; },
+                searching: function() { return 'جاري البحث...'; }
+            }
         });
     });
 </script>

@@ -17,13 +17,26 @@ class EnrollmentController extends Controller
     public function index(Request $request)
     {
         // Get filter parameters
+        $search = $request->input('search');
         $courseId = $request->input('course_id');
         $studentId = $request->input('student_id');
         $courseType = $request->input('course_type');
-        $status = $request->input('status', 'pending');
+        $status = $request->input('status'); // Removed 'pending' default to allow seeing all
         
         // Query enrollments with relationships
         $enrollments = Enrollment::with(['course', 'student', 'approver'])
+            // 1. General Search (Student Name, Student ID, Course Name)
+            ->when($search, function ($query) use ($search) {
+                $query->where(function($q) use ($search) {
+                    $q->whereHas('student', function($sq) use ($search) {
+                        $sq->where('name', 'like', "%{$search}%")
+                           ->orWhere('national_id', 'like', "%{$search}%");
+                    })->orWhereHas('course', function($cq) use ($search) {
+                        $cq->where('name', 'like', "%{$search}%");
+                    });
+                });
+            })
+            // 2. Specific Filters
             ->when($courseId, function ($query) use ($courseId) {
                 return $query->where('course_id', $courseId);
             })
@@ -41,22 +54,16 @@ class EnrollmentController extends Controller
             ->latest()
             ->paginate(20);
 
+        // Append query strings so pagination links remember the filters
         $enrollments->appends($request->query());
 
-        // Get filter options
-        $courses = Course::where('is_registration_open', true)->get();
+        // ✅ FIXED: Fetch ALL courses so the admin can filter past enrollments
+        $courses = Course::latest()->get(); 
         $students = User::withRole('student')->get();
         $statuses = ['pending' => 'قيد الانتظار', 'approved' => 'مقبول', 'rejected' => 'مرفوض'];
 
         return view('admin.enrollments.index', compact(
-            'enrollments',
-            'courses',
-            'students',
-            'statuses',
-            'courseId',
-            'studentId',
-            'courseType',
-            'status'
+            'enrollments', 'courses', 'students', 'statuses'
         ));
     }
 
