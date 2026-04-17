@@ -9,10 +9,18 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Services\NotificationService;
 
 
 class GroupController extends Controller
 {
+    protected $notificationService;
+
+    public function __construct(NotificationService $notificationService)
+    {
+        $this->notificationService = $notificationService;
+    }
+
     /**
      * Display groups for a specific course.
      */
@@ -137,6 +145,7 @@ class GroupController extends Controller
             'student_id' => 'required|exists:users,id',
         ]);
         
+        
         // Check if student is enrolled in course
         if (!$course->approvedStudents()->where('student_id', $request->student_id)->exists()) {
             return back()->with('error', 'الطالب غير مسجل في هذه الدورة');
@@ -170,7 +179,15 @@ class GroupController extends Controller
         
         // Update group student count
         $group->increment('current_students');
-        
+
+        $student_name = User::find($request->student_id)->name;
+        Log::info($student_name);
+        $this->notificationService->notifySheikhNewStudent(
+            $group->sheikh_id, 
+            $student_name, 
+            $group->name, 
+            $group->id
+        );
         return back()->with('success', 'تم إضافة الطالب إلى المجموعة بنجاح');
     }
     
@@ -184,7 +201,12 @@ class GroupController extends Controller
         
         // Update group student count
         $group->decrement('current_students');
-        
+        $this->notificationService->notifySheikhStudentRemovedFromGroup(
+            $group->sheikh_id, 
+            $student->name, 
+            $group->name, 
+            $group->id
+        );
         return back()->with('success', 'تم إزالة الطالب من المجموعة بنجاح');
     }
     

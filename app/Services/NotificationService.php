@@ -1,317 +1,282 @@
 <?php
-/**
- * UPDATED NOTIFICATION SERVICE
- * 
- * File: app/Services/NotificationService.php
- * 
- * Updated to work with existing notifications table
- * Uses correct field names and handles backward compatibility
- */
+// Path: app/Services/NotificationService.php
 
 namespace App\Services;
 
+use App\Jobs\PushFcmNotification;
 use App\Models\Notification;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class NotificationService
 {
-    /**
-     * Send notification to students only
-     */
-    public function notifyStudents(
-        string $title, 
-        string $message, 
-        string $type = 'custom_broadcast',
-        ?array $data = null,
-        ?int $createdBy = null
-    ): Notification {
-        return $this->createAndSendNotification(
-            title: $title,
-            message: $message,
-            type: $type,
-            target: 'students',
-            data: $data,
-            createdBy: $createdBy
-        );
-    }
+    private function getTopicTargetsForUser(User $user): array
+    {
+        $roles = $user->getRoleNames()->map(fn($r) => strtolower($r))->toArray();
+        Log::info("FCM topic targets — userId: {$user->id}, roles: " . implode(', ', $roles));
 
-    /**
-     * Send notification to teachers/sheikhs only
-     */
-    public function notifyTeachers(
-        string $title, 
-        string $message, 
-        string $type = 'custom_broadcast',
-        ?array $data = null,
-        ?int $createdBy = null
-    ): Notification {
-        return $this->createAndSendNotification(
-            title: $title,
-            message: $message,
-            type: $type,
-            target: 'teachers',
-            data: $data,
-            createdBy: $createdBy
-        );
-    }
-
-    /**
-     * Send notification to both students and teachers
-     */
-    public function notifyAll(
-        string $title, 
-        string $message, 
-        string $type = 'custom_broadcast',
-        ?array $data = null,
-        ?int $createdBy = null
-    ): Notification {
-        return $this->createAndSendNotification(
-            title: $title,
-            message: $message,
-            type: $type,
-            target: 'both',
-            data: $data,
-            createdBy: $createdBy
-        );
-    }
-
-    /**
-     * Send enrollment approval notification to a specific student
-     */
-    public function notifyEnrollmentApproved(
-        int $studentId,
-        int $courseId,
-        string $courseName
-    ): Notification {
-        $notification = Notification::create([
-            'title' => 'تم قبول التحاقك',
-            'message' => "تم قبول التحاقك في دورة: {$courseName}",
-            'type' => 'enrollment',
-            'target' => 'students',
-            'data' => ['course_id' => $courseId, 'student_id' => $studentId],
-            'is_active' => true,
-            'created_by' => auth()->id() ?? 1,
-            'sent_at' => now(),
-        ]);
-
-        // Send only to this specific student
-        $notification->recipients()->sync([$studentId]);
-
-        return $notification;
-    }
-
-    /**
-     * Send course start notification
-     */
-    public function notifyCourseStarting(
-        int $courseId,
-        string $courseName,
-        array $recipientIds = []
-    ): Notification {
-        $notification = Notification::create([
-            'title' => 'الدورة ستبدأ قريباً',
-            'message' => "دورة {$courseName} ستبدأ في الوقت المحدد",
-            'type' => 'course_start',
-            'target' => 'both',
-            'data' => ['course_id' => $courseId],
-            'is_active' => true,
-            'created_by' => auth()->id() ?? 1,
-            'sent_at' => now(),
-        ]);
-
-        if (empty($recipientIds)) {
-            $recipientIds = $this->getRecipientIds('both');
+        if (array_intersect($roles, ['admin', 'super-admin', 'superadmin'])) {
+            return ['teachers', 'students', 'both'];
         }
-
-        $notification->recipients()->sync($recipientIds);
-
-        return $notification;
-    }
-
-    /**
-     * Send course end notification
-     */
-    public function notifyCourseEnding(
-        int $courseId,
-        string $courseName,
-        array $recipientIds = []
-    ): Notification {
-        $notification = Notification::create([
-            'title' => 'الدورة انتهت',
-            'message' => "انتهت دورة {$courseName}",
-            'type' => 'course_end',
-            'target' => 'both',
-            'data' => ['course_id' => $courseId],
-            'is_active' => true,
-            'created_by' => auth()->id() ?? 1,
-            'sent_at' => now(),
-        ]);
-
-        if (empty($recipientIds)) {
-            $recipientIds = $this->getRecipientIds('both');
+        if (array_intersect($roles, ['teacher', 'sheikh', 'شيخ', 'معلم'])) {
+            return ['teachers', 'both'];
         }
-
-        $notification->recipients()->sync($recipientIds);
-
-        return $notification;
+        if (array_intersect($roles, ['student', 'طالب'])) {
+            return ['students', 'both'];
+        }
+        Log::warning("No role matched for userId: {$user->id} — fallback to ['both']");
+        return ['both'];
     }
 
     /**
-     * Core method: Create and send notification
+     * Core method: Create notification record AND dispatch FCM job.
+     *
+     * KEY FIX: $data always gets 'type' merged in so the FCM payload
+     * contains data['type'] and Flutter can route notification taps correctly.
      */
-    private function createAndSendNotification(
-        string $title,
-        string $message,
-        string $type,
-        string $target,
-        ?array $data = null,
-        ?int $createdBy = null
-    ): Notification {
-        // Create notification
-        $notification = Notification::create([
-            'title' => $title,
-            'message' => $message,
-            'type' => $type,
-            'target' => $target,
-            'data' => $data,
-            'is_active' => true,
-            'created_by' => $createdBy ?? auth()->id() ?? 1,
-            'sent_at' => now(),
-        ]);
-
-        // Send to recipients based on target
-        $recipientIds = $this->getRecipientIds($target);
-        $notification->recipients()->sync($recipientIds);
-
-        return $notification;
-    }
-
-    /**
-     * Get recipient IDs based on target
-     */
-    private function getRecipientIds(string $target): array
-    {
-        return match($target) {
-            'students' => $this->getStudentIds(),
-            'teachers' => $this->getTeacherIds(),
-            'both' => array_unique(array_merge($this->getStudentIds(), $this->getTeacherIds())),
-            default => [],
-        };
-    }
-
-    /**
-     * Get all student IDs (users with 'student' role)
-     * Using Spatie Laravel Permissions
-     */
-    private function getStudentIds(): array
-    {
-        return User::role('student')
-                   ->where('is_active', true)
-                   ->pluck('id')
-                   ->toArray();
-    }
-
-    /**
-     * Get all teacher/sheikh IDs (users with 'sheikh', 'teacher', 'admin' roles)
-     * Using Spatie Laravel Permissions
-     */
-    private function getTeacherIds(): array
-    {
-        return User::role(['sheikh', 'teacher', 'admin', 'supervisor'])
-                   ->where('is_active', true)
-                   ->pluck('id')
-                   ->toArray();
-    }
-
-    /**
-     * Get count of unread notifications for a user
-     */
-    public function getUnreadCount(User $user): int
-    {
-        return $user->notifications()
-                    ->wherePivot('is_read', false)
-                    ->count();
-    }
-
-    /**
-     * Mark notification as read for a user
-     */
-    public function markAsRead(User $user, int $notificationId): bool
-    {
-        return (bool) $user->notifications()
-                          ->wherePivot('notification_id', $notificationId)
-                          ->update(['is_read' => true, 'read_at' => now()]);
-    }
-
-    /**
-     * Mark all notifications as read for a user
-     */
-    public function markAllAsRead(User $user): void
-    {
-        $user->notifications()
-             ->wherePivot('is_read', false)
-             ->update(['is_read' => true, 'read_at' => now()]);
-    }
-
-    /**
-     * Get paginated notifications for a user
-     */
-    public function getPaginatedNotifications(User $user, int $perPage = 15)
-    {
-        return $user->notifications()
-                    ->latest('user_notifications.created_at')
-                    ->paginate($perPage);
-    }
-
-    /**
-     * Delete notification for a user (from their notification list)
-     */
-    public function deleteForUser(User $user, int $notificationId): bool
-    {
-        return (bool) $user->notifications()
-                          ->detach($notificationId);
-    }
-
-    /**
-     * Create a draft notification (not sent yet)
-     */
-    public function createDraft(
+    public function createAndSendNotification(
+        int $userId,
         string $title,
         string $message,
         string $type,
         string $target,
         ?array $data = null
     ): Notification {
-        return Notification::create([
-            'title' => $title,
-            'message' => $message,
-            'type' => $type,
-            'target' => $target,
-            'data' => $data,
-            'is_active' => false,  // Draft (not active)
-            'created_by' => auth()->id() ?? 1,
-            'sent_at' => null,     // Not sent yet
-        ]);
+        try {
+            $validTargets = ['individual', 'students', 'teachers', 'both'];
+            if (!in_array($target, $validTargets) && !is_numeric($target)) {
+                throw new \Exception("Invalid target: $target");
+            }
+
+            $notification = Notification::create([
+                'created_by' => $userId,
+                'title'      => $title,
+                'message'    => $message,
+                'type'       => $type,
+                'target'     => is_numeric($target) ? 'individual' : $target,
+                'data'       => $data,
+                'sent_at'    => now(),
+            ]);
+
+            // FIX: Always include 'type' in the FCM data payload.
+            // Without this, Flutter receives data['type'] == null and
+            // cannot route the notification tap to the correct screen.
+            $fcmData = array_merge(['type' => $type], $data ?? []);
+
+            if (in_array($target, ['students', 'teachers', 'both'])) {
+                PushFcmNotification::dispatch($target, $title, $message, $fcmData);
+            } elseif (is_numeric($target)) {
+                $notification->recipients()->attach((int)$target, [
+                    'is_read' => false,
+                    'read_at' => null,
+                ]);
+                PushFcmNotification::dispatch([(int)$target], $title, $message, $fcmData);
+            }
+
+            return $notification;
+        } catch (\Exception $e) {
+            Log::error('NotificationService Error: ' . $e->getMessage());
+            throw $e;
+        }
     }
 
-    /**
-     * Publish a draft notification
-     */
-    public function publishDraft(int $notificationId, array $recipientIds = []): Notification
+    // ── Retrieve ──────────────────────────────────────────────────────────────
+
+    public function getUserNotifications(int $userId, $perPage = 15)
+    {
+        $user         = User::findOrFail($userId);
+        $topicTargets = $this->getTopicTargetsForUser($user);
+
+        return Notification::where(function ($query) use ($userId) {
+                $query->whereHas('recipients', function ($q) use ($userId) {
+                    $q->where('user_id', $userId);
+                });
+            })
+            ->orWhere(function ($query) use ($topicTargets) {
+                $query->whereIn('target', $topicTargets);
+            })
+            ->with(['recipients' => function ($q) use ($userId) {
+                $q->where('user_id', $userId);
+            }])
+            ->orderBy('sent_at', 'desc')
+            ->paginate($perPage);
+    }
+
+    public function getUnreadCount(int $userId): int
+    {
+        $user         = User::findOrFail($userId);
+        $topicTargets = $this->getTopicTargetsForUser($user);
+
+        $directUnread = Notification::whereHas('recipients', function ($q) use ($userId) {
+                $q->where('user_id', $userId)->where('is_read', false);
+            })->count();
+
+        $topicUnread = Notification::whereIn('target', $topicTargets)
+            ->whereDoesntHave('recipients', function ($q) use ($userId) {
+                $q->where('user_id', $userId);
+            })->count();
+
+        Log::info("getUnreadCount — userId: {$userId}, targets: [" . implode(',', $topicTargets) . "], direct: {$directUnread}, topic: {$topicUnread}");
+
+        return $directUnread + $topicUnread;
+    }
+
+    public function markAsRead(int $notificationId, int $userId): bool
     {
         $notification = Notification::findOrFail($notificationId);
+        $exists = $notification->recipients()->where('user_id', $userId)->exists();
 
-        if (empty($recipientIds)) {
-            $recipientIds = $this->getRecipientIds($notification->target);
+        if ($exists) {
+            $notification->recipients()->updateExistingPivot($userId, [
+                'is_read' => true, 'read_at' => now(),
+            ]);
+        } else {
+            $notification->recipients()->attach($userId, [
+                'is_read' => true, 'read_at' => now(),
+            ]);
+        }
+        return true;
+    }
+
+    public function markAllAsRead(int $userId): bool
+    {
+        $user         = User::findOrFail($userId);
+        $topicTargets = $this->getTopicTargetsForUser($user);
+
+        DB::table('user_notifications')
+            ->where('user_id', $userId)
+            ->where('is_read', false)
+            ->update(['is_read' => true, 'read_at' => now(), 'updated_at' => now()]);
+
+        $unreadTopicIds = Notification::whereIn('target', $topicTargets)
+            ->whereDoesntHave('recipients', function ($q) use ($userId) {
+                $q->where('user_id', $userId);
+            })->pluck('id');
+
+        if ($unreadTopicIds->isNotEmpty()) {
+            $now     = now();
+            $inserts = $unreadTopicIds->map(fn($id) => [
+                'user_id'         => $userId,
+                'notification_id' => $id,
+                'is_read'         => true,
+                'read_at'         => $now,
+                'created_at'      => $now,
+                'updated_at'      => $now,
+            ])->toArray();
+            DB::table('user_notifications')->insert($inserts);
         }
 
-        $notification->update([
-            'is_active' => true,
-            'sent_at' => now(),
-        ]);
+        Log::info("markAllAsRead — userId: {$userId}, topic pivot records: " . $unreadTopicIds->count());
+        return true;
+    }
 
-        $notification->recipients()->sync($recipientIds);
+    public function getAdminNotifications($perPage = 20)
+    {
+        return Notification::latest()->paginate($perPage);
+    }
 
-        return $notification;
+    // ── Broadcasts ────────────────────────────────────────────────────────────
+
+    public function broadcastToStudents(string $title, string $message, ?array $data = null): Notification
+    {
+        return $this->createAndSendNotification(
+            auth()->id(), $title, $message, 'custom_broadcast', 'students', $data
+        );
+    }
+
+    public function broadcastToTeachers(string $title, string $message, ?array $data = null): Notification
+    {
+        return $this->createAndSendNotification(
+            auth()->id(), $title, $message, 'custom_broadcast', 'teachers', $data
+        );
+    }
+
+    public function broadcastToAll(string $title, string $message, ?array $data = null): Notification
+    {
+        return $this->createAndSendNotification(
+            auth()->id(), $title, $message, 'custom_broadcast', 'both', $data
+        );
+    }
+
+    // ── Enrollment ────────────────────────────────────────────────────────────
+
+    public function notifyEnrollmentApproved(int $studentId, int $courseId, string $courseName): Notification
+    {
+        return $this->createAndSendNotification(
+            1, 'تم قبولك في الدورة',
+            "تم قبول انضمامك إلى دورة: {$courseName}",
+            'enrollment', (string)$studentId,
+            ['course_id' => $courseId, 'status' => 'approved']
+            // 'type' => 'enrollment' is auto-merged by createAndSendNotification
+        );
+    }
+
+    public function notifyEnrollmentRejected(int $studentId, int $courseId, string $courseName, ?string $reason = null): Notification
+    {
+        return $this->createAndSendNotification(
+            1, 'تم رفض طلبك',
+            "تم رفض انضمامك إلى دورة: {$courseName}" . ($reason ? "\nالسبب: $reason" : ""),
+            'enrollment', (string)$studentId,
+            ['course_id' => $courseId, 'status' => 'rejected']
+        );
+    }
+
+    // ── Sheikh notifications ──────────────────────────────────────────────────
+
+    public function notifySheikhNewStudent(int $sheikhId, string $studentName, string $groupName, int $groupId): Notification
+    {
+        // FCM data will contain: type=new_student, group_id, group_name, student_name
+        // Flutter NotificationHelper routes 'new_student' → /students ✅
+        return $this->createAndSendNotification(
+            1, 'طالب جديد في حلقتك',
+            "تمت إضافة الطالب {$studentName} إلى مجموعة {$groupName}",
+            'new_student', (string)$sheikhId,
+            ['group_id' => $groupId, 'group_name' => $groupName, 'student_name' => $studentName]
+        );
+    }
+
+    public function notifySheikhStudentWithdrawn(int $sheikhId, string $studentName, string $courseName, int $courseId): Notification
+    {
+        // FCM data will contain: type=enrollment → Flutter routes to /students ✅
+        return $this->createAndSendNotification(
+            1, 'طالب انسحب من الدورة',
+            "انسحب الطالب {$studentName} من دورة {$courseName}",
+            'enrollment', (string)$sheikhId,
+            ['course_id' => $courseId, 'course_name' => $courseName, 'student_name' => $studentName]
+        );
+    }
+
+    public function notifySheikhStudentRemovedFromGroup(int $sheikhId, string $studentName, string $groupName, int $groupId): Notification
+    {
+        // FCM data will contain: type=enrollment → Flutter routes to /students ✅
+        return $this->createAndSendNotification(
+            1, 'طالب تمت إزالته من المجموعة',
+            "تمت إزالة الطالب {$studentName} من مجموعة {$groupName}",
+            'enrollment', (string)$sheikhId,
+            ['group_id' => $groupId, 'group_name' => $groupName, 'student_name' => $studentName]
+        );
+    }
+
+    // ── Course status ─────────────────────────────────────────────────────────
+
+    public function notifyCourseStarting(int $courseId, string $courseName, string $startTime): Notification
+    {
+        return $this->createAndSendNotification(
+            1, 'الدورة تبدأ اليوم',
+            "دورة {$courseName} تبدأ اليوم الساعة {$startTime}",
+            'course_start', 'students',
+            ['course_id' => $courseId, 'course_name' => $courseName, 'start_time' => $startTime]
+        );
+    }
+
+    public function notifyCourseEnded(int $courseId, string $courseName): Notification
+    {
+        return $this->createAndSendNotification(
+            1, 'انتهت الدورة',
+            "الدورة {$courseName} قد انتهت. شكراً لمشاركتك!",
+            'course_end', 'students',
+            ['course_id' => $courseId, 'course_name' => $courseName]
+        );
     }
 }

@@ -280,6 +280,7 @@ class AuthController extends Controller
                     'title' => $item->title,
                     'message' => \Illuminate\Support\Str::limit($item->message, 30),
                     'target_group' => $item->target_group,
+                    'target' => $item->target,
                     'created_at' => $item->created_at->diffForHumans(),
                 ];
             });

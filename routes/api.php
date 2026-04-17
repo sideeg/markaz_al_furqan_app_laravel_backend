@@ -35,8 +35,7 @@ Route::prefix('v1')->group(function () {
     // Authentication
     Route::post('/sheikh/login', 'App\Http\Controllers\Api\SheikhController@login');
 
-    // Authenticated Routes
-        // Dashboard
+    
        
 });
 
@@ -48,7 +47,9 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     Route::put('/profile', [AuthController::class, 'updateProfile']);
     Route::put('/change-password', [AuthController::class, 'changePassword']);
     Route::post('/refresh-token', [AuthController::class, 'refreshToken']);
-    
+
+   
+   
     // Course enrollment (Student)
     Route::post('/courses/{course}/enroll', [CourseController::class, 'enroll']);
     Route::delete('/courses/{course}/withdraw', [CourseController::class, 'withdraw']);
@@ -64,12 +65,15 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
         Route::get('/my-statistics', [HifzController::class, 'myStatistics']);
     });
     
+    Route::post('/store-token', [AuthController::class, 'storeToken']);
     // Notifications
     Route::prefix('notifications')->group(function () {
         Route::get('/', [NotificationController::class, 'index']);
-        Route::post('/{notification}/read', [NotificationController::class, 'markAsRead']);
+        Route::post('/{id}/read', [NotificationController::class, 'markAsRead']);
         Route::post('/mark-all-read', [NotificationController::class, 'markAllAsRead']);
-        Route::delete('/{notification}', [NotificationController::class, 'delete']);
+         // Get unread count
+        Route::get('/unread/count', [NotificationController::class, 'unreadCount']);
+    
     });
     
 
@@ -116,8 +120,9 @@ Route::middleware('role:sheikh')->prefix('sheikh')->group(function () {
 
     Route::put('/profile', [SheikhController::class, 'updateProfile']);
     Route::get('/profile', [SheikhController::class, 'getProfile']);
-    // Notifications
-    Route::post('/notifications/send', [NotificationController::class, 'sendToStudents']);
+    
+
+    Route::post('/store-token', [AuthController::class, 'storeToken']);
 });
 });
 // Fallback route for API

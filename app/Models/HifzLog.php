@@ -32,7 +32,6 @@ class HifzLog extends Model
         'session_time' => 'string',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
-        'deleted_at' => 'datetime',  
     ];
 
     public function student()
@@ -59,19 +58,5 @@ class HifzLog extends Model
         return $this->belongsTo(Group::class);
     }
  
-    /**
-     * Scope: Only active (not soft-deleted)
-     */
-    public function scopeActive($query)
-    {
-        return $query->whereNull('deleted_at');
-    }
- 
-    /**
-     * Scope: Only deleted (soft-deleted)
-     */
-    public function scopeDeleted($query)
-    {
-        return $query->whereNotNull('deleted_at');
-    }
+  
 }

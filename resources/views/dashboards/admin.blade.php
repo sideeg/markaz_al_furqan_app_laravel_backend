@@ -924,18 +924,19 @@
                             
                             <div class="notification-list">
                                 @forelse($notifications ?? [] as $notification)
-                                <div class="notification-item {{ $notification['created_at'] ? 'new' : '' }}">
-                                    <div class="d-flex justify-content-between">
-                                        <strong>{{ $notification['title'] ?? 'عنوان الإشعار' }}</strong>
-                                        <small class="text-muted">{{ $notification['time'] ?? 'منذ ساعة' }}</small>
+                                    <div class="notification-item">
+                                        <div class="d-flex justify-content-between">
+                                        <strong>{{ $notification['title'] }}</strong>
+                                        <small class="text-muted">{{ $notification['created_at'] }}</small>
                                     </div>
-                                    <p class="mb-1">{{ $notification['message'] ?? 'محتوى الإشعار هنا' }}</p>
+                                    <div class="mb-1">{{ $notification['message'] }}</div>
+                                    
                                     <span class="badge 
-                                        @if(($notification['target'] ?? 'all') === 'all') bg-info
-                                        @elseif(($notification['target'] ?? 'students') === 'students') bg-primary
+                                        @if($notification['target'] === 'both') bg-info
+                                        @elseif($notification['target'] === 'students') bg-primary
                                         @else bg-success
                                         @endif">
-                                        {{ $notification['target'] ?? 'الجميع' }}
+                                        {{ $notification['target'] }}
                                     </span>
                                 </div>
                                 @empty
@@ -947,7 +948,7 @@
                             </div>
                             
                             <div class="text-center mt-3">
-                                <a href="#" class="btn btn-outline-primary">عرض جميع الإشعارات</a>
+                                <a href="{{route('admin.notifications.index')}}" class="btn btn-outline-primary">عرض جميع الإشعارات</a>
                             </div>
                         </div>
                     </div>
@@ -1186,32 +1187,44 @@
   </div>
 </div>
 <!-- Notification Modal -->
-<div class="modal fade @if($errors->hasBag('notification')) show d-block @endif" id="sendNotificationModal" tabindex="-1" aria-labelledby="sendNotificationModalLabel" aria-hidden="true">
+<div class="modal fade @if($errors->any()) show d-block @endif" id="sendNotificationModal" tabindex="-1" aria-labelledby="sendNotificationModalLabel" aria-hidden="true" @if($errors->any()) style="background: rgba(0,0,0,0.5);" @endif>
   <div class="modal-dialog">
     <form method="POST" action="{{ route('admin.notifications.store') }}">
       @csrf
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title">إرسال إشعار</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @if($errors->any()) onclick="document.getElementById('sendNotificationModal').classList.remove('show', 'd-block')" @endif></button>
         </div>
         <div class="modal-body">
-          @if($errors->notification->any())
+          
+          @if(session('success'))
+            <div class="alert alert-success">{{ session('success') }}</div>
+          @endif
+          @if(session('error'))
+            <div class="alert alert-danger">{{ session('error') }}</div>
+          @endif
+
+          @if($errors->any())
             <div class="alert alert-danger">
-              <ul>
-                @foreach ($errors->notification->all() as $error)
+              <ul class="mb-0">
+                @foreach ($errors->all() as $error)
                   <li>{{ $error }}</li>
                 @endforeach
               </ul>
             </div>
           @endif
+
           <input type="text" name="title" class="form-control mb-2" placeholder="عنوان الإشعار" value="{{ old('title') }}" required>
-          <textarea name="body" class="form-control mb-2" placeholder="محتوى الإشعار" required>{{ old('body') }}</textarea>
+          
+          <textarea name="message" class="form-control mb-2" placeholder="محتوى الإشعار" required>{{ old('message') }}</textarea>
+          
           <select name="target" class="form-control mb-2">
             <option value="students">الطلاب</option>
-            <option value="sheikhs">المشايخ</option>
-            <option value="all">الجميع</option>
+            <option value="teachers">المشايخ</option>
+            <option value="both">الجميع</option>
           </select>
+          
         </div>
         <div class="modal-footer">
           <button type="submit" class="btn btn-info">إرسال</button>

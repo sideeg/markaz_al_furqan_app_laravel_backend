@@ -10,7 +10,7 @@ use App\Models\Mosque;
 use App\Models\Notification;
 use App\Models\Enrollment;
 use App\Observers\CourseObserver;
-use App\Observers\GroupObserver;
+use App\Observers\GroupStudentObserver;
 use App\Observers\MosqueObserver;
 use App\Observers\NotificationObserver;
 use App\Observers\EnrollmentObserver;
@@ -33,7 +33,7 @@ class AppServiceProvider extends ServiceProvider
         Paginator::useBootstrap();
         // Link the models to their observers
         Course::observe(CourseObserver::class);
-        Group::observe(GroupObserver::class);
+        Group::observe(GroupStudentObserver::class);
         Mosque::observe(MosqueObserver::class);
         Notification::observe(NotificationObserver::class);
         Enrollment::observe(EnrollmentObserver::class);

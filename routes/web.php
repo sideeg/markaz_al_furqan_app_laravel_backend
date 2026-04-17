@@ -66,7 +66,6 @@ Route::middleware('auth')->group(function () {
     // Route::post('/admin/mosques', [MosqueManagementController::class, 'store'])->name('admin.mosques.store');
     // Route::post('/admin/sheikhs', [SheikhController::class, 'store'])->name('admin.sheikhs.store');
 Route::post('/admin/admins', [AdminController::class, 'store'])->name('admin.admins.store');
-Route::post('/admin/notifications', [NotificationController::class, 'store'])->name('admin.notifications.store');
 Route::resource('mosques', MosqueManagementController::class);
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->group(function () {
@@ -88,7 +87,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/notifications/{notification}', [NotificationController::class, 'show'])->name('admin.notifications.show');
     Route::get('/notifications/{notification}/edit', [NotificationController::class, 'edit'])->name('admin.notifications.edit');
     Route::put('/notifications/{notification}', [NotificationController::class, 'update'])->name('admin.notifications.update');
-    
+    Route::delete('/notifications/{notification}', [NotificationController::class, 'destroy'])->name('admin.notifications.destroy');
 });
 Route::prefix('students')->middleware(['auth', 'role:admin|supervisor'])->group(function () {
     Route::get('/', [StudentController::class, 'index'])->name('admin.students.index');

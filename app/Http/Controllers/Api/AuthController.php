@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
+use App\Models\DeviceToken;
 
 class AuthController extends Controller
 {
@@ -284,6 +285,20 @@ class AuthController extends Controller
             'created_at' => $user->created_at,
             'updated_at' => $user->updated_at,
         ];
+    }
+
+    public function storeToken(Request $request) {
+        $request->validate([
+            'fcm_token' => 'required|string',
+            'device_type' => 'required|in:android,ios'
+        ]);
+
+        DeviceToken::updateOrCreate(
+            ['fcm_token' => $request->fcm_token],
+            ['user_id' => auth()->id(), 'device_type' => $request->device_type]
+        );
+
+        return response()->json(['status' => 'Token saved']);
     }
 }
 

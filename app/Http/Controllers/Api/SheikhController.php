@@ -194,12 +194,14 @@ class SheikhController extends Controller
    // Backend Controller Method - Improved Version
 public function myStudents()
 {
+    Log::info('Fetching my students...');
     $sheikh_id = auth()->id();
-    
+    Log::info('Sheikh ID: ' . $sheikh_id);
     // Get groups with their related data
     $groups = Group::where('sheikh_id', $sheikh_id)
         ->with(['students', 'course'])
         ->get();
+    Log::info('Groups fetched successfully.');
     
     // Transform the data to include group and course info for each student
     $studentsWithDetails = [];
@@ -223,12 +225,15 @@ public function myStudents()
                     'description' => $group->course->description ?? null,
                 ]
             ];
+            
+            Log::info('Student data transformed successfully.');
         }
+        Log::info('Group data transformed successfully.');
     }
     
     // Get courses for additional info if needed
     $courses = Course::whereIn('id', $groups->pluck('course_id'))->get();
-    
+    Log::info('Courses fetched successfully.');
     return response()->json([
         'success' => true,
         'data' => [
@@ -412,6 +417,12 @@ public function myStudents()
 
         $totalGroups = Group::where('sheikh_id', $sheikhId)->count();
 
+        // ── Unread notification count ─────────────────────────────────────────
+    // Injected here to save the Flutter app a separate network request.
+    // Uses the same role-aware logic from NotificationService.
+    $notificationService = app(\App\Services\NotificationService::class);
+    $unreadCount = $notificationService->getUnreadCount($sheikhId);
+
         // ── Recent hifz logs ──────────────────────────────────────────
         $recentHifzLogs = HifzLog::where('sheikh_id', $sheikhId)
             ->with(['student', 'course'])
@@ -476,6 +487,7 @@ public function myStudents()
                 ],
                 'recent_hifz_logs'   => $recentHifzLogs,
                 'recent_review_logs' => $recentReviewLogs,
+                 'unread_notifications_count'  => $unreadCount,
             ]
         ]);
     }
