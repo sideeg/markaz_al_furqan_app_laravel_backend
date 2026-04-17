@@ -8,6 +8,7 @@ use App\Models\Course;
 use App\Models\Mosque;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use App\Services\NotificationService;
 
 class CourseController extends Controller
 {
@@ -182,4 +183,36 @@ class CourseController extends Controller
 
         return redirect()->back()->with('success', 'تم حذف الدورة بنجاح');
     }
+
+   
+
+public function markCompleted(Course $course, NotificationService $notificationService)
+{
+    // Prevent double execution
+    if ($course->is_completed) {
+        return back()->with('error', 'هذه الدورة مكتملة بالفعل.'); // "Course is already completed"
+    }
+
+    // 1. Update DB (Course & Enrollments)
+    $course->markAsCompleted();
+
+    // 2. Fire Notifications to Sheikhs and Students
+    $notificationService->notifyCourseCompleted($course);
+
+    return back()->with('success', 'تم إنهاء الدورة وإرسال الإشعارات بنجاح.'); // "Course ended and notifications sent"
+}
+
+public function toggleCompletion(Course $course, NotificationService $notificationService)
+{
+    if ($course->is_completed) {
+        $course->markAsIncomplete();
+        return back()->with('success', 'تم إلغاء اكتمال الدورة وإعادة فتحها بنجاح.');
+    } else {
+        $course->markAsCompleted();
+        // Send the notification automatically to students and sheikhs
+        $notificationService->notifyCourseCompleted($course);
+        
+        return back()->with('success', 'تم إنهاء الدورة وإرسال الإشعارات للطلاب والمشايخ بنجاح.');
+    }
+}
 }

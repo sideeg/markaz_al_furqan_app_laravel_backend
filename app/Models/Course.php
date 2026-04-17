@@ -31,6 +31,8 @@ class Course extends Model
         'requirements',
         'schedule_details',
         'created_by',
+         'is_completed',
+        'completed_at',
     ];
 
     /**
@@ -45,6 +47,8 @@ class Course extends Model
         'is_registration_open' => 'boolean',
         'max_students' => 'integer',
         'current_students' => 'integer',
+        'is_completed' => 'boolean',
+        'completed_at' => 'datetime',
     ];
 
     /**
@@ -66,6 +70,42 @@ class Course extends Model
     const TYPE_ONLINE = 'online';
     const TYPE_OPEN = 'open';
     const TYPE_CLOSED = 'closed';
+
+    /**
+ * Mark the course as completed and update related enrollments.
+ */
+public function markAsCompleted(): void
+    {
+        // 1. Mark course as completed and close registration/activity
+        $this->update([
+            'is_completed' => true,
+            'completed_at' => now(),
+            'is_active' => false,
+            'is_registration_open' => false,
+        ]);
+
+        // 2. Automatically mark all 'approved' students as 'completed'
+        $this->enrollments()
+            ->where('status', 'approved')
+            ->update(['status' => 'completed']);
+    }
+
+    /**
+     * Mark the course as incomplete (re-open it).
+     */
+    public function markAsIncomplete(): void
+    {
+        $this->update([
+            'is_completed' => false,
+            'completed_at' => null,
+            'is_active' => true,
+        ]);
+
+        // Revert 'completed' enrollments back to 'approved'
+        $this->enrollments()
+             ->where('status', 'completed')
+             ->update(['status' => 'approved']);
+    }
 
     /**
      * Get the mosque that owns the course.
@@ -132,7 +172,7 @@ class Course extends Model
      */
     public function enrollments()
     {
-        return $this->hasMany(CourseEnrollment::class);
+        return $this->hasMany(Enrollment::class);
     }
 
     /**

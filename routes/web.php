@@ -152,6 +152,8 @@ Route::prefix('admin')->group(function() {
         'update' => 'admin.courses.update',
         'destroy' => 'admin.courses.destroy'
     ]);
+    Route::post('courses/{course}/toggle-completion', [CourseController::class, 'toggleCompletion'])
+    ->name('admin.courses.toggle-completion');
 
     // Enrollment management routes
     Route::prefix('admin')->group(function() {

@@ -8,6 +8,7 @@ use App\Models\Notification;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Models\Course;
 
 class NotificationService
 {
@@ -279,4 +280,68 @@ class NotificationService
             ['course_id' => $courseId, 'course_name' => $courseName]
         );
     }
+
+    /**
+     * Notify students and sheikhs that a course has been completed.
+     */
+    public function notifyCourseCompleted(Course $course)
+    {
+        // 1. Gather all Approved Student IDs
+        $studentIds = $course->approvedStudents()->pluck('users.id')->toArray();
+
+        // 2. Gather all Sheikh IDs from the course groups
+        $sheikhIds = $course->groups()
+            ->whereNotNull('sheikh_id')
+            ->pluck('sheikh_id')
+            ->unique()
+            ->toArray();
+
+        // Combine and remove duplicates
+        $targetUserIds = array_unique(array_merge($studentIds, $sheikhIds));
+
+        if (empty($targetUserIds)) {
+            return; // No one to notify
+        }
+
+        DB::transaction(function () use ($course, $targetUserIds) {
+            $type = 'course_end';
+            $title = 'انتهاء الدورة'; // "Course Completed"
+            $message = "تم بحمد الله الانتهاء من دورة: {$course->name}. نسأل الله أن ينفعكم بما تعلمتم.";
+
+            $data = [
+                'course_id' => (string) $course->id,
+                'course_name' => $course->name,
+                // The service architecture merges 'type' => 'course_end' automatically,
+                // but we can pass it here if your implementation requires it.
+            ];
+
+            // Create notification record in database
+            $notification = Notification::create([
+                'title' => $title,
+                'message' => $message,
+                'type' => $type,
+                'target' => 'individual', // Direct to specific user IDs
+                'data' => $data,
+                // Using auth()->id() or fallback to 1 (System Admin) as noted in your known bugs
+                'created_by' => auth()->id() ?? 1, 
+                'sent_at' => now(),
+            ]);
+
+            // Create the pivot records for Unread Counts (user_notifications table)
+            $notification->recipients()->attach(
+                collect($targetUserIds)->mapWithKeys(function ($id) {
+                    return [$id => ['is_read' => false]];
+                })->toArray()
+            );
+
+            // Dispatch job to Queue
+            PushFcmNotification::dispatch(
+                $targetUserIds, 
+                $title, 
+                $message, 
+                array_merge(['type' => $type], $data)
+            );
+        });
+    }
+
 }

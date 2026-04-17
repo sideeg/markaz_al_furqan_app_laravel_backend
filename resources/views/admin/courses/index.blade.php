@@ -96,6 +96,9 @@
                         </span>
                     </td>
                     <td>
+                       @if($course->is_completed)
+                            <span class="badge bg-dark mb-1">مكتملة</span><br>
+                        @endif
                         <span class="badge {{ $course->is_active ? 'bg-success' : 'bg-secondary' }}">
                             {{ $course->is_active ? 'نشطة' : 'معطلة' }}
                         </span>
@@ -114,6 +117,13 @@
                                 @method('GET')
                                 <button class="btn btn-sm btn-secondary" title="إدارة المجموعات">
                                     <i class="fas fa-users"></i>
+                                </button>
+                            </form>
+                            <form action="{{ route('admin.courses.toggle-completion', $course) }}" method="POST" onsubmit="return confirm('هل أنت متأكد من تغيير حالة اكتمال الدورة؟')">
+                                @csrf
+                                <button class="btn btn-sm {{ $course->is_completed ? 'btn-warning' : 'btn-success' }}" 
+                                        title="{{ $course->is_completed ? 'إلغاء الاكتمال' : 'تحديد كمكتملة' }}">
+                                    <i class="fas {{ $course->is_completed ? 'fa-undo' : 'fa-check-double' }}"></i>
                                 </button>
                             </form>
                             <form action="{{ route('admin.courses.destroy', $course) }}" method="POST" onsubmit="return confirm('هل أنت متأكد من حذف هذه الدورة؟')">

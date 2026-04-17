@@ -3,14 +3,26 @@
 @section('title', 'تفاصيل الدورة: ' . $course->name)
 
 @section('content')
-<div class="content-header">
+<div class="content-header d-flex justify-content-between align-items-center">
     <div class="page-title">
         <i class="fas fa-eye"></i>
         <h3>تفاصيل الدورة: {{ $course->name }}</h3>
     </div>
-    <a href="{{ route('admin.courses.index') }}" class="btn btn-secondary">
-        <i class="fas fa-arrow-left"></i> العودة للقائمة
-    </a>
+    
+    <div class="d-flex gap-2">
+        <!-- Manual Toggle Button -->
+        <form action="{{ route('admin.courses.toggle-completion', $course) }}" method="POST">
+            @csrf
+            <button type="submit" class="btn {{ $course->is_completed ? 'btn-warning' : 'btn-success' }}" onclick="return confirm('هل أنت متأكد من هذا الإجراء؟')">
+                <i class="fas {{ $course->is_completed ? 'fa-undo' : 'fa-check-double' }}"></i> 
+                {{ $course->is_completed ? 'إلغاء الاكتمال' : 'إنهاء الدورة الآن' }}
+            </button>
+        </form>
+
+        <a href="{{ route('admin.courses.index') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> العودة للقائمة
+        </a>
+    </div>
 </div>
 
 <div class="admin-card">
@@ -63,7 +75,16 @@
                 <strong>تاريخ الانتهاء:</strong>
                 <p>{{ $course->end_date->format('Y-m-d') }}</p>
             </div>
-
+            <div class="col-md-6 mb-3">
+    <strong>حالة الاكتمال:</strong>
+    <p>
+        @if($course->is_completed)
+            <span class="badge bg-dark">مكتملة ({{ $course->completed_at?->format('Y-m-d') }})</span>
+        @else
+            <span class="badge bg-info">قيد التقدم</span>
+        @endif
+    </p>
+</div>
             <div class="col-md-6 mb-3">
                 <strong>عدد الطلاب:</strong>
                 <p>{{ $course->current_students }} / {{ $course->max_students }}</p>
