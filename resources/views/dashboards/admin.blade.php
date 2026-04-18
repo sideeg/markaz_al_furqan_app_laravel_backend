@@ -1049,7 +1049,15 @@
                     @error('profile_image', 'sheikh')
                         <div class="invalid-feedback d-block">{{ $message }}</div>
                     @enderror
-
+                    <select name="nationality" class="form-control mb-2 @error('nationality', 'sheikh') is-invalid @enderror">
+                        <option value="">اختر الجنسية</option>
+                        @foreach(config('nationalities') as $nat)
+                            <option value="{{ $nat }}" {{ old('nationality') == $nat ? 'selected' : '' }}>{{ $nat }}</option>
+                        @endforeach
+                    </select>
+                    @error('nationality', 'sheikh')
+                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                    @enderror
                     <input type="password" name="password" class="form-control mb-2 @error('password', 'sheikh') is-invalid @enderror" placeholder="كلمة المرور" required>
                     @error('password', 'sheikh')
                         <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -1167,6 +1175,15 @@
             </select>
             @error('gender', 'admin')
             <div class="invalid-feedback d-block">{{ $message }}</div>
+            @enderror
+            <select name="nationality" class="form-control mb-2 @error('nationality', 'sheikh') is-invalid @enderror">
+                <option value="">اختر الجنسية</option>
+                @foreach(config('nationalities') as $nat)
+                    <option value="{{ $nat }}" {{ old('nationality') == $nat ? 'selected' : '' }}>{{ $nat }}</option>
+                @endforeach
+            </select>
+            @error('nationality', 'sheikh')
+                <div class="invalid-feedback d-block">{{ $message }}</div>
             @enderror
           <input type="password" name="password" 
                  class="form-control mb-2 @error('password', 'admin') is-invalid @enderror" 

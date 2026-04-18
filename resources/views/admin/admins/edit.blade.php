@@ -45,7 +45,15 @@
                         <input type="email" class="form-control" name="email" 
                                value="{{ old('email', $admin->email) }}" required>
                     </div>
-                    
+                     <select name="nationality" class="form-control mb-2 @error('nationality', 'sheikh') is-invalid @enderror">
+            <option value="">اختر الجنسية</option>
+            @foreach(config('nationalities') as $nat)
+                <option value="{{ $nat }}" {{ old('nationality') == $nat ? 'selected' : '' }}>{{ $nat }}</option>
+            @endforeach
+        </select>
+        @error('nationality', 'sheikh')
+            <div class="invalid-feedback d-block">{{ $message }}</div>
+        @enderror
                     <div class="mb-3">
                         <label class="form-label fw-bold">رقم الهاتف <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" name="phone" 

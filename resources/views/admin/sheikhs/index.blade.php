@@ -85,7 +85,9 @@
 
         <div>
             <strong>{{ $sheikh->name }}</strong>
-            <div class="text-muted small">{{ $sheikh->national_id }}</div>
+            <div class="text-muted small">{{ $sheikh->national_id }}
+                @if($sheikh->nationality) <span class="badge bg-light text-dark">{{ $sheikh->nationality }}</span> @endif
+            </div>
         </div>
     </div>
 </td>
@@ -187,6 +189,15 @@
             <option value="أنثي" {{ old('gender') == 'أنثي' ? 'selected' : '' }}>أنثي</option>
         </select>
         @error('gender')
+            <div class="invalid-feedback d-block">{{ $message }}</div>
+        @enderror
+        <select name="nationality" class="form-control mb-2 @error('nationality', 'sheikh') is-invalid @enderror">
+            <option value="">اختر الجنسية</option>
+            @foreach(config('nationalities') as $nat)
+                <option value="{{ $nat }}" {{ old('nationality') == $nat ? 'selected' : '' }}>{{ $nat }}</option>
+            @endforeach
+        </select>
+        @error('nationality', 'sheikh')
             <div class="invalid-feedback d-block">{{ $message }}</div>
         @enderror
           <input type="text" name="national_id"

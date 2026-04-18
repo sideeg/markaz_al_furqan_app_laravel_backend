@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use App\Models\DeviceToken;
-
+use Illuminate\Validation\Rule;
 class AuthController extends Controller
 {
     /**
@@ -28,6 +28,7 @@ class AuthController extends Controller
                 'password' => Hash::make($request->password),
                 'phone' => $request->phone,
                 'national_id' => $request->national_id,
+                'nationality' => $request->nationality,
                 'qiraat' => $request->qiraat,
                 'gender'                => $request->gender,
             ]);

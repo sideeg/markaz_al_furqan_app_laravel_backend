@@ -12,7 +12,6 @@ use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
 use App\Models\AdminActivityLog;
- 
 
 class AdminController extends Controller
 {
@@ -71,6 +70,7 @@ class AdminController extends Controller
             'phone' => 'nullable|unique:users,phone',  // Made optional
             'role' => 'nullable|in:admin,super_admin',  // Made optional with default
             'profile_image' => 'nullable|image|max:2048',
+            'nationality' => ['nullable', 'string', Rule::in(config('nationalities'))],
             'password' => 'required|min:8|confirmed',
         ]);
 
@@ -92,6 +92,7 @@ class AdminController extends Controller
             'gender'        => $request->gender ?? null,
             'profile_image' => $imagePath,
             'password' => Hash::make($request->password),
+            'nationality' => $request->nationality,
             'is_active' => true,
         ]);
 
@@ -157,6 +158,7 @@ class AdminController extends Controller
             'role' => 'required|in:admin,super_admin',
             'gender'       => 'required|in:ذكر,أنثي',
             'profile_image' => 'nullable|image|max:2048',
+            'nationality' => ['nullable', 'string', Rule::in(config('nationalities'))],
             'password' => 'nullable|min:8|confirmed',
             'remove_image' => 'nullable|boolean',
         ]);
@@ -166,6 +168,7 @@ class AdminController extends Controller
             'email'    => $request->email,
             'phone'    => $request->phone,
             'gender'   => $request->gender,
+            'nationality' => $request->nationality,
             'password' => $request->password ? Hash::make($request->password) : $admin->password,
         ];
 

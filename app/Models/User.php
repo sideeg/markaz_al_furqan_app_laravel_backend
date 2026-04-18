@@ -23,6 +23,7 @@ class User extends Authenticatable
         'password',
         'phone',
         'national_id',
+        'nationality',
         'qiraat',
         'gender',
         'profile_image',

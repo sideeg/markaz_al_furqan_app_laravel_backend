@@ -19,218 +19,176 @@
 </div>
 
 <div class="row">
-    <!-- Sheikh Info -->
+    <!-- Sheikh Profile -->
     <div class="col-md-4">
         <div class="admin-card">
-            <div class="card-header bg-primary text-white">
+            <div class="card-header bg-success text-white">
                 <h5>الملف الشخصي</h5>
             </div>
             <div class="card-body text-center">
                 @if($sheikh->profile_image)
-                <img src="{{ $sheikh->profile_image_url }}" 
-                     alt="{{ $sheikh->name }}" 
-                     class="rounded-circle mb-3" 
-                     width="120" height="120">
+                <img src="{{ $sheikh->profile_image_url }}" alt="{{ $sheikh->name }}" class="rounded-circle mb-3 border" width="120" height="120" style="object-fit: cover;">
                 @else
-                <div class="bg-light rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" 
-                     style="width: 120px; height: 120px;">
-                    <span class="fw-bold" style="font-size: 2rem;">{{ $sheikh->initials }}</span>
+                <div class="bg-light text-success rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3 border" style="width: 120px; height: 120px;">
+                    <span class="fw-bold" style="font-size: 2.5rem;">{{ $sheikh->initials }}</span>
                 </div>
                 @endif
                 
                 <h4 class="mb-2">{{ $sheikh->name }}</h4>
-                <p class="text-muted mb-1">{{ $sheikh->qiraat }}</p>
-                <p class="text-muted mb-3">{{ $sheikh->national_id }}</p>
-                
                 <div class="d-flex justify-content-center mb-3">
-                    <form action="{{ route('admin.sheikhs.toggle-status', $sheikh) }}" method="POST">
-                        @csrf
-                        @method('PATCH')
-                        <button type="submit" class="btn btn-sm {{ $sheikh->is_active ? 'btn-success' : 'btn-danger' }}">
-                            {{ $sheikh->is_active ? 'نشط' : 'معطل' }}
-                        </button>
-                    </form>
+                    <span class="badge bg-success">شيخ / معلم</span>
                 </div>
                 
-                <div class="row text-center">
-                    <div class="col-6">
-                        <div class="p-2 bg-light rounded">
-                            <h5 class="mb-0">{{ $sheikh->teachingCourses->count() }}</h5>
-                            <small class="text-muted">الدورات</small>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div class="p-2 bg-light rounded">
-                            <h5 class="mb-0">{{ $sheikh->teachingGroups->count() }}</h5>
-                            <small class="text-muted">المجموعات</small>
-                        </div>
-                    </div>
-                </div>
+                <form action="{{ route('admin.sheikhs.toggle-status', $sheikh) }}" method="POST" class="mb-4">
+                    @csrf @method('PATCH')
+                    <button type="submit" class="btn btn-sm {{ $sheikh->is_active ? 'btn-success' : 'btn-danger' }}">
+                        {{ $sheikh->is_active ? 'حساب نشط' : 'حساب معطل' }}
+                    </button>
+                </form>
             </div>
         </div>
         
         <div class="admin-card mt-4">
-            <div class="card-header bg-primary text-white">
-                <h5>معلومات الاتصال</h5>
+            <div class="card-header bg-success text-white">
+                <h5>المعلومات الشخصية والاتصال</h5>
             </div>
-            <div class="card-body">
+            <div class="card-body p-0">
                 <ul class="list-group list-group-flush">
                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <div>
-                            <i class="fas fa-envelope me-2 text-primary"></i>
-                            البريد الإلكتروني
-                        </div>
-                        <span>{{ $sheikh->email }}</span>
+                        <div><i class="fas fa-envelope me-2 text-success"></i>البريد</div>
+                        <span dir="ltr">{{ $sheikh->email }}</span>
                     </li>
                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <div>
-                            <i class="fas fa-phone me-2 text-primary"></i>
-                            الهاتف
-                        </div>
-                        <span>{{ $sheikh->phone }}</span>
+                        <div><i class="fas fa-phone me-2 text-success"></i>الهاتف</div>
+                        <span dir="ltr">{{ $sheikh->phone ?? '—' }}</span>
                     </li>
                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <div>
-                            <i class="fas fa-id-card me-2 text-primary"></i>
-                            الرقم الوطني
-                        </div>
-                        <span>{{ $sheikh->national_id }}</span>
+                        <div><i class="fas fa-id-card me-2 text-success"></i>الهوية</div>
+                        <span>{{ $sheikh->national_id ?? '—' }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div><i class="fas fa-flag me-2 text-success"></i>الجنسية</div>
+                        <span>
+                            @if($sheikh->nationality)
+                                <span class="badge bg-light text-dark border">{{ $sheikh->nationality }}</span>
+                            @else
+                                <span class="text-muted">—</span>
+                            @endif
+                        </span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div><i class="fas fa-quran me-2 text-success"></i>القراءة</div>
+                        <span class="text-success fw-bold">{{ $sheikh->qiraat ?? '—' }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div><i class="fas fa-venus-mars me-2 text-success"></i>الجنس</div>
+                        <span>
+                            @if($sheikh->gender)
+                                <span class="badge {{ $sheikh->gender == 'ذكر' ? 'bg-info text-dark' : 'bg-warning text-dark' }}">{{ $sheikh->gender }}</span>
+                            @else
+                                <span class="text-muted">—</span>
+                            @endif
+                        </span>
                     </li>
                 </ul>
             </div>
         </div>
     </div>
-    
-    <!-- Sheikh Activities -->
+
+    <!-- Sheikh Data (Right Col) -->
     <div class="col-md-8">
         <div class="admin-card">
-            <div class="card-header bg-primary text-white">
-                <h5>الدورات والمجموعات</h5>
+            <div class="card-header bg-success text-white">
+                <h5>الدورات التي يُدرّسها</h5>
             </div>
-            <div class="card-body">
+            <div class="card-body p-0">
                 @if($sheikh->teachingCourses->count() > 0)
-                <h6 class="mb-3">الدورات التعليمية</h6>
                 <div class="table-responsive">
-                    <table class="table admin-table">
-                        <thead>
+                    <table class="table table-hover mb-0 text-center">
+                        <thead class="table-light">
                             <tr>
                                 <th>اسم الدورة</th>
+                                <th>النوع</th>
                                 <th>تاريخ البدء</th>
-                                <th>عدد الطلاب</th>
-                                <th>الحالة</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($sheikh->teachingCourses as $course)
+                            @foreach ($sheikh->teachingCourses as $course)
                             <tr>
-                                <td>{{ $course->name }}</td>
-                                <td>{{ $course->start_date->format('Y-m-d') }}</td>
-                                <td>{{ $course->current_students }} / {{ $course->max_students }}</td>
-                                <td>
-                                    <span class="badge {{ $course->is_active ? 'bg-success' : 'bg-secondary' }}">
-                                        {{ $course->is_active ? 'نشطة' : 'منتهية' }}
-                                    </span>
-                                </td>
+                                <td class="fw-bold">{{ $course->name }}</td>
+                                <td><span class="badge bg-light text-dark border">{{ $course->type_display_name }}</span></td>
+                                <td>{{ optional($course->start_date)->format('Y-m-d') ?? '—' }}</td>
                             </tr>
                             @endforeach
                         </tbody>
                     </table>
                 </div>
                 @else
-                <div class="alert alert-info text-center">
-                    لا توجد دورات مسندة لهذا الشيخ
-                </div>
-                @endif
-                
-                @if($sheikh->teachingGroups->count() > 0)
-                <hr>
-                <h6 class="mb-3">المجموعات الدراسية</h6>
-                <div class="table-responsive">
-                    <table class="table admin-table">
-                        <thead>
-                            <tr>
-                                <th>اسم المجموعة</th>
-                                <th>المسجد</th>
-                                <th>عدد الطلاب</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($sheikh->teachingGroups as $group)
-                            <tr>
-                                <td>{{ $group->name }}</td>
-                                <td>
-                                    @if($group->mosque)
-                                    {{ $group->mosque->name }}
-                                    @else
-                                    <span class="text-muted">بدون مسجد</span>
-                                    @endif
-                                </td>
-                                <td>{{ $group->students->count() }}</td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+                <div class="text-center py-4 text-muted">
+                    <i class="fas fa-book fa-2x mb-2 opacity-25"></i>
+                    <p class="mb-0">لا توجد دورات مسندة لهذا الشيخ</p>
                 </div>
                 @endif
             </div>
         </div>
-        
-        <div class="admin-card mt-4">
-            <div class="card-header bg-primary text-white">
-                <h5>آخر أنشطة الحفظ والمراجعة</h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <h6 class="mb-3">سجل الحفظ</h6>
-                        @if($sheikh->createdHifzLogs->count() > 0)
-                        <ul class="list-group">
-                            @foreach($sheikh->createdHifzLogs as $log)
-                            <li class="list-group-item">
-                                <div class="d-flex justify-content-between">
-                                    <strong>{{ $log->student->name }}</strong>
-                                    <span>{{ $log->date->format('Y-m-d') }}</span>
-                                </div>
-                                <div class="text-muted small">
-                                    {{ $log->surah->name }}: الآيات {{ $log->start_ayah }} - {{ $log->end_ayah }}
-                                </div>
-                                <div class="mt-1">
-                                    <span class="badge bg-info">{{ $log->evaluation }}</span>
-                                </div>
-                            </li>
-                            @endforeach
-                        </ul>
-                        @else
-                        <div class="alert alert-info text-center">
-                            لا توجد سجلات حفظ
-                        </div>
-                        @endif
+
+        <div class="row mt-4">
+            <!-- Hifz Logs -->
+            <div class="col-md-6">
+                <div class="admin-card h-100">
+                    <div class="card-header bg-info text-white">
+                        <h5>أحدث سجلات الحفظ</h5>
                     </div>
-                    
-                    <div class="col-md-6">
-                        <h6 class="mb-3">سجل المراجعة</h6>
-                        @if($sheikh->createdReviewLogs->count() > 0)
-                        <ul class="list-group">
-                            @foreach($sheikh->createdReviewLogs as $log)
+                    <div class="card-body p-0">
+                        <ul class="list-group list-group-flush">
+                            @forelse ($sheikh->createdHifzLogs as $log)
                             <li class="list-group-item">
-                                <div class="d-flex justify-content-between">
-                                    <strong>{{ $log->student->name }}</strong>
-                                    <span>{{ $log->date->format('Y-m-d') }}</span>
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <strong class="text-primary">{{ $log->student->name ?? 'طالب محذوف' }}</strong>
+                                    <!-- Here is the Date fix -->
+                                    <small class="text-muted">{{ optional($log->date)->format('Y-m-d') ?? 'بدون تاريخ' }}</small>
                                 </div>
-                                <div class="text-muted small">
-                                    {{ $log->surah->name }}: الآيات {{ $log->start_ayah }} - {{ $log->end_ayah }}
+                                <div class="small">
+                                    سورة {{ $log->from_surah ?? '—' }} ({{ $log->start_ayah ?? '-' }} إلى {{ $log->end_ayah ?? '-' }})
                                 </div>
                                 <div class="mt-1">
-                                    <span class="badge bg-info">{{ $log->evaluation }}</span>
+                                    <span class="badge bg-success">{{ $log->evaluation ?? 'تم التسميع' }}</span>
                                 </div>
                             </li>
-                            @endforeach
+                            @empty
+                            <li class="list-group-item text-center text-muted py-3">لا توجد سجلات حفظ</li>
+                            @endforelse
                         </ul>
-                        @else
-                        <div class="alert alert-info text-center">
-                            لا توجد سجلات مراجعة
-                        </div>
-                        @endif
+                    </div>
+                </div>
+            </div>
+
+            <!-- Review Logs -->
+            <div class="col-md-6">
+                <div class="admin-card h-100">
+                    <div class="card-header bg-secondary text-white">
+                        <h5>أحدث سجلات المراجعة</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <ul class="list-group list-group-flush">
+                            @forelse ($sheikh->createdReviewLogs as $log)
+                            <li class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <strong class="text-primary">{{ $log->student->name ?? 'طالب محذوف' }}</strong>
+                                    <!-- Here is the Date fix -->
+                                    <small class="text-muted">{{ optional($log->date)->format('Y-m-d') ?? 'بدون تاريخ' }}</small>
+                                </div>
+                                <div class="small">
+                                    من سورة {{ $log->from_surah ?? '—' }} إلى {{ $log->to_surah ?? '—' }}
+                                </div>
+                                <div class="mt-1">
+                                    <span class="badge bg-secondary">{{ $log->evaluation ?? 'تمت المراجعة' }}</span>
+                                </div>
+                            </li>
+                            @empty
+                            <li class="list-group-item text-center text-muted py-3">لا توجد سجلات مراجعة</li>
+                            @endforelse
+                        </ul>
                     </div>
                 </div>
             </div>

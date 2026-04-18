@@ -8,46 +8,55 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\Controller;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Log;
 
 class StudentController extends Controller
 {
     public function index(Request $request)
     {
         // 1. Start with only students
-        $query = User::role('student');
+    $query = User::role('student');
 
-        // 2. Search by Name, Email, or Phone
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                ->orWhere('email', 'like', "%{$search}%")
-                ->orWhere('phone', 'like', "%{$search}%")
-                ->orWhere('national_id', 'like', "%{$search}%");
-            });
-        }
+    // 2. Search by Name, Email, or Phone
+    if ($request->filled('search')) {
+        $search = trim($request->search);
+        $query->where(function($q) use ($search) {
+            $q->where('users.name', 'like', "%{$search}%")
+              ->orWhere('users.email', 'like', "%{$search}%")
+              ->orWhere('users.phone', 'like', "%{$search}%")
+              ->orWhere('users.national_id', 'like', "%{$search}%");
+        });
+    }
 
-        // 3. Filter by Gender
-        if ($request->filled('gender')) {
-            $query->where('gender', $request->gender);
-        }
+    // 3. Filter by Gender
+    if ($request->filled('gender')) {
+        $query->where('users.gender', 'like', '%' . trim($request->gender) . '%');
+    }
 
-        // 4. Filter by Qiraat
-        if ($request->filled('qiraat')) {
-            $query->where('qiraat', $request->qiraat);
-        }
+    // 4. Filter by Qiraat
+    if ($request->filled('qiraat')) {
+        $query->where('users.qiraat', 'like', '%' . trim($request->qiraat) . '%');
+    }
 
-        // 5. Filter by Status (Active/Inactive)
-        // We use strict matching here because '0' (inactive) is considered empty in PHP if we just check ->filled() without care in some older Laravel versions, but filled() handles '0' correctly in modern Laravel.
-        if ($request->has('status') && $request->status !== '') {
-            $query->where('is_active', (bool) $request->status);
-        }
+    // 5. Filter by Nationality (Here is the fix!)
+    if ($request->filled('nationality')) {
+        $cleanNationality = trim($request->nationality); // إزالة المسافات الزائدة نهائياً
+        
+        // استخدام LIKE يضمن إيجاد الكلمة حتى لو كان في قاعدة البيانات مسافة بالخطأ
+        $query->where('users.nationality', 'like', "%{$cleanNationality}%");
+    }
+    
+     $status = $request->input('status');
+    if ($status !== null) {
+        $query->where('users.is_active', (bool) $status);
+    }
 
-        // 6. Execute with Pagination and preserve query strings
-        $students = $query->latest()->paginate(15);
-        $students->appends($request->query());
+    // 7. Execute with Pagination and preserve query strings
+    $students = $query->latest()->paginate(15);
+    $students->appends($request->query());
 
-        return view('admin.students.index', compact('students'));
+    return view('admin.students.index', compact('students'));
     }
 
     public function create()
@@ -62,8 +71,10 @@ class StudentController extends Controller
             'email' => 'required|email|unique:users,email',
             'phone' => 'nullable|string|max:20',
             'national_id' => 'nullable|string|max:20',
+            'gender' => 'nullable|string|max:50',
             'qiraat' => 'nullable|string|max:50',
             'profile_image' => 'nullable|image|max:2048',
+            'nationality' => ['nullable', 'string', Rule::in(config('nationalities'))],
             'password' => 'required|string|min:6|confirmed',
             'is_active' => 'nullable|boolean',
         ], [], [
@@ -71,6 +82,7 @@ class StudentController extends Controller
             'email' => 'البريد الإلكتروني يجب ان يكون عنوان بريد إلكتروني صالح',
             'phone' => 'رقم الهاتف يجب ان يكون نص ليس اطول من 20 حرف',
             'national_id' => 'الرقم القومي يجب ان يكون نص ليس اطول من 20 حرف',
+            'nationality' => 'الرجاء اختيار الجنسية',
             'qiraat' => 'الرجاء اختيار القراءة',
             'profile_image' => 'صورة الملف الشخصي يجب ان تكون صورة',
             'password' => 'يجب ان تكون  علي الاقل ستة حروف و يجب ان تتكون من حروف وكلمات مرور',
@@ -119,6 +131,8 @@ class StudentController extends Controller
             'email' => 'required|email|unique:users,email,' . $student->id,
             'phone' => 'nullable|string|max:20',
             'national_id' => 'nullable|string|max:20',
+            'nationality' => ['nullable', 'string', Rule::in(config('nationalities'))],
+            'gender' => 'nullable|string|max:50',
             'qiraat' => 'nullable|string|max:50',
             'profile_image' => 'nullable|image|max:2048',
             'password' => 'nullable|string|min:6|confirmed',

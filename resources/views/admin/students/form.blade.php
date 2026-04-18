@@ -17,6 +17,20 @@
             <input type="text" name="national_id" class="form-control" value="{{ old('national_id', $student->national_id ?? '') }}">
         </div>
         <div class="mb-3">
+                <label for="nationality" class="form-label fw-bold">الجنسية</label>
+                <select class="form-control @error('nationality') is-invalid @enderror" id="nationality" name="nationality">
+                    <option value="">اختر الجنسية</option>
+                    @foreach(config('nationalities') as $nat)
+                        <option value="{{ $nat }}" {{ old('nationality', $student->nationality ?? '') == $nat ? 'selected' : '' }}>
+                            {{ $nat }}
+                        </option>
+                    @endforeach
+                </select>
+                @error('nationality')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+        <div class="mb-3">
             <label>القراءة</label>
             <select name="qiraat" class="form-control mb-2 @error('qiraat') is-invalid @enderror">
     <option value="">اختر القراءة</option>

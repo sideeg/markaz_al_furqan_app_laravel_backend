@@ -26,6 +26,18 @@
                     <input type="text" name="search" class="form-control" placeholder="الاسم، الإيميل، الهاتف..." value="{{ request('search') }}">
                 </div>
             </div>
+            {{-- Nationality Filter --}}
+            <div class="col-md-2">
+                <label class="form-label small fw-bold">الجنسية</label>
+                <select name="nationality" class="form-select">
+                    <option value="">الكل</option>
+                    @foreach(config('nationalities') as $nat)
+                        <option value="{{ $nat }}" {{ request('nationality') == $nat ? 'selected' : '' }}>
+                            {{ $nat }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
 
             {{-- Gender Filter --}}
             <div class="col-md-2">
@@ -65,7 +77,7 @@
                 <button type="submit" class="btn btn-primary flex-grow-1">
                     <i class="fas fa-filter me-1"></i> تصفية
                 </button>
-                @if(request()->anyFilled(['search', 'gender', 'qiraat', 'status']))
+                @if(request()->anyFilled(['search', 'gender', 'qiraat', 'status','nationality']))
                     <a href="{{ route('admin.students.index') }}" class="btn btn-outline-danger" title="إلغاء الفلاتر">
                         <i class="fas fa-times"></i>
                     </a>
@@ -104,9 +116,10 @@
                         </td>
                         <td>
                             <strong>{{ $student->name }}</strong>
-                            @if($student->national_id)
-                                <div class="text-muted small">{{ $student->national_id }}</div>
-                            @endif
+                            <div class="text-muted small">
+                                @if($student->national_id) {{ $student->national_id }} @endif
+                                @if($student->nationality) <span class="badge bg-light text-dark">{{ $student->nationality }}</span> @endif
+                            </div>
                         </td>
                         <td>{{ $student->email }}</td>
                         <td>{{ $student->phone ?? '—' }}</td>

@@ -39,6 +39,15 @@
                         <input type="text" class="form-control" name="phone" required>
                     </div>
                 </div>
+                 <select name="nationality" class="form-control mb-2 @error('nationality', 'sheikh') is-invalid @enderror">
+                    <option value="">اختر الجنسية</option>
+                    @foreach(config('nationalities') as $nat)
+                        <option value="{{ $nat }}" {{ old('nationality') == $nat ? 'selected' : '' }}>{{ $nat }}</option>
+                    @endforeach
+                </select>
+                @error('nationality', 'sheikh')
+                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                @enderror                                           
                 <div class="mb-3">
                     <label class="form-label fw-bold">الجنس <span class="text-danger">*</span></label>
                     <select name="gender" class="form-select @error('gender') is-invalid @enderror" required>

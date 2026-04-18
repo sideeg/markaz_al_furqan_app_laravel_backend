@@ -79,7 +79,9 @@
                                 @endif
                                 <div>
                                     <strong>{{ $admin->name }}</strong>
-                                    <div class="text-muted small">{{ $admin->phone }}</div>
+                                    <div class="text-muted small">{{ $admin->phone }}
+                                        @if($admin->nationality) <span class="badge bg-light text-dark">{{ $admin->nationality }}</span> @endif
+                                    </div>
                                     {{-- ADD THIS --}}
                                     @if($admin->gender)
                                         <span class="badge {{ $admin->gender == 'ذكر' ? 'bg-info text-dark' : 'bg-warning text-dark' }}">

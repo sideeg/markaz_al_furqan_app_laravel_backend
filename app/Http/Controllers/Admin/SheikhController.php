@@ -69,6 +69,7 @@ class SheikhController extends Controller
         'phone' => 'required|unique:users,phone',
         'national_id' => 'required|unique:users,national_id',
         'qiraat' => 'required|string|max:50',
+        'nationality' => ['nullable', 'string', Rule::in(config('nationalities'))],
         'profile_image' => 'nullable|image|max:2048',
         'password' => 'required|min:8|confirmed',
     ]);
@@ -86,6 +87,7 @@ class SheikhController extends Controller
             'qiraat' => $request->qiraat,
             'gender'        => $request->gender, 
             'profile_image' => $imagePath,
+            'nationality' => $request->nationality,
             'password' => Hash::make($request->password),
             'is_active' => true,
         ]);
@@ -156,6 +158,7 @@ class SheikhController extends Controller
             ],
             'qiraat' => 'required|string|max:50',
             'profile_image' => 'nullable|image|max:2048',
+            'nationality' => ['nullable', 'string', Rule::in(config('nationalities'))],
             'password' => 'nullable|min:8|confirmed',
         ]);
 
@@ -173,6 +176,7 @@ class SheikhController extends Controller
             'phone' => $request->phone,
             'national_id' => $request->national_id,
             'qiraat' => $request->qiraat,
+            'nationality' => $request->nationality,
             'gender'      => $request->gender,
             'password' => $request->password ? Hash::make($request->password) : $sheikh->password,
         ]);
