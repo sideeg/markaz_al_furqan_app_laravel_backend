@@ -86,8 +86,6 @@ class HifzController extends Controller
                 END) as avg_evaluation
             ')
             ->first();
-        Log::info(['statistics' => $statistics]);
-        Log::info(['total_ayahs_memorized' =>(int) $statistics->total_ayahs_memorized]);
         // عدد الآيات التقريبي في القرآن هو 6236 آية
         $totalQuranAyahs = 6236;
         $memorizedAyahs = (int) $statistics->total_ayahs_memorized;
@@ -226,7 +224,6 @@ class HifzController extends Controller
 
     public function storeReview(Request $request)
     {
-        Log::info($request->all());
         $log = new ReviewLog();
         $log->student_id = $request->student_id;
         $log->group_id = $request->group_id;

@@ -110,17 +110,14 @@ class SheikhController extends Controller
 
     foreach ($groups as $group) {
         $course = $group->course;
-        Log::info($course);
         // تجنب تكرار الدورات
         if (!in_array($course->id, $processedCourses)) {
-            Log::info($course->id);
             $processedCourses[] = $course->id;
             
             // حساب عدد المجموعات للشيخ في هذه الدورة
             $groupsCount = Group::where('course_id', $course->id)
                               ->where('sheikh_id', auth()->id())
                               ->count();
-            Log::info($groupsCount);
 
             $coursesData[] = [
                 'id' => $course->id,
@@ -150,7 +147,6 @@ class SheikhController extends Controller
             ];
         }
     }
-    Log::info($coursesData);
     return response()->json([
         'success' => true,
         'data' => $coursesData,
@@ -312,7 +308,6 @@ public function myStudents()
 
     public function updateProfile(Request $request)
     {
-        Log::info('Request Data: ' . json_encode($request->all()));
         $user = auth()->user();
         // Handle password update separately
         if ($request->has('current_password')) {

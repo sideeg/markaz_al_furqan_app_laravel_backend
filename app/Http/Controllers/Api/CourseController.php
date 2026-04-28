@@ -63,7 +63,6 @@ class CourseController extends Controller
                     return $course;
                 });
             }
-            Log::info($courses->items());
             return response()->json([
                 'success' => true,
                 'data' => $courses->items(),

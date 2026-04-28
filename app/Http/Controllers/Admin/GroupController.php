@@ -63,7 +63,6 @@ class GroupController extends Controller
             'schedule_details' => 'required|string|max:500',
             'sheikh_id' => 'nullable|exists:users,id',
         ]);
-        Log::info(auth()->id());
         Group::create([
             'name' => $request->name,
             'description' => $request->description,
@@ -92,7 +91,6 @@ class GroupController extends Controller
                 $query->where('course_id', $course->id);
             })
             ->get();
-        Log::info($availableStudents);
         return view('admin.groups.show', compact('course', 'group', 'availableStudents', 'shiekh'));
     }
 
@@ -181,7 +179,6 @@ class GroupController extends Controller
         $group->increment('current_students');
 
         $student_name = User::find($request->student_id)->name;
-        Log::info($student_name);
         $this->notificationService->notifySheikhNewStudent(
             $group->sheikh_id, 
             $student_name, 
@@ -207,7 +204,6 @@ class GroupController extends Controller
             $group->name, 
             $group->id
         );
-        Log::info($student->name);
         return back()->with('success', 'تم إزالة الطالب من المجموعة بنجاح');
     }
     

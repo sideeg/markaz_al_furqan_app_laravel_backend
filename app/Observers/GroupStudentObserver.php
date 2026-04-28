@@ -28,8 +28,7 @@ class GroupStudentObserver
         // Get the student being added
         $student = User::find($relatedId);
         $sheikh = $group->sheikh;
-        Log::info('sheikh: ' . $sheikh);
-        Log::info('student: ' . $student);
+       
         if ($student && $sheikh) {
             // Notify sheikh that a new student was added to their group
             $this->notificationService->notifySheikhNewStudent(
