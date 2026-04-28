@@ -12,6 +12,13 @@ use App\Services\NotificationService;
 
 class CourseController extends Controller
 {
+    private NotificationService $notificationService;
+        public function __construct()
+    {
+        
+        $this->notificationService = new NotificationService();
+    }
+
     /**
      * Display a listing of the courses.
      */
@@ -108,7 +115,7 @@ class CourseController extends Controller
             'schedule_details' => $request->schedule_details,
             'created_by' => Auth::id(),
         ]);
-
+        $this->notificationService->notifyNewCourse(Course::latest()->first()->id, $request->name);
         return redirect()->back()->with('success', 'تمت إضافة الدورة بنجاح');
     }
 

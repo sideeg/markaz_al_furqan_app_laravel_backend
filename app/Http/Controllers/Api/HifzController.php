@@ -30,41 +30,79 @@ class HifzController extends Controller
         return response()->json($logs);
     }
 
-    public function myProgress(Request $request)
+   public function myProgress(Request $request)
     {
-        $progress = HifzLog::where('student_id', auth()->user()->id)
-            
+        $userId = auth()->id();
+
+        // تجميع تقدم الطالب في كل دورة بشكل مفصل
+        $progress = HifzLog::where('student_id', $userId)
+            ->with('course:id,name') // نحضر اسم الدورة مباشرة لتخفيف العبء عن Flutter
+            ->selectRaw('
+                course_id, 
+                COUNT(id) as sessions_count,
+                SUM(end_ayah - start_ayah + 1) as total_ayahs_memorized,
+                AVG(CASE 
+                    WHEN evaluation = "excellent" THEN 100 
+                    WHEN evaluation = "very_good" THEN 85 
+                    WHEN evaluation = "good" THEN 70 
+                    WHEN evaluation = "needs_improvement" THEN 50 
+                    WHEN evaluation = "poor" THEN 30 
+                    ELSE 0 
+                END) as course_evaluation_percent
+            ')
             ->groupBy('course_id')
-            ->get();
-        return response()->json($progress);
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'course_id' => $item->course_id,
+                    'course_name' => $item->course ? $item->course->name : 'دورة محذوفة',
+                    'sessions_count' => (int) $item->sessions_count,
+                    'total_ayahs' => (int) $item->total_ayahs_memorized,
+                    'evaluation_percent' => round($item->course_evaluation_percent, 1)
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'data' => $progress
+        ]);
     }
 
     public function myStatistics(Request $request)
-{
-    $userId = auth()->user()->id;
+    {
+        $userId = auth()->id();
 
-    $statistics = HifzLog::where('student_id', $userId)
-        ->selectRaw('
-            count(*) as count,
-            avg(CASE 
-                WHEN evaluation = "excellent" THEN 5 
-                WHEN evaluation = "very_good" THEN 4 
-                WHEN evaluation = "good" THEN 3 
-                WHEN evaluation = "needs_improvement" THEN 2 
-                WHEN evaluation = "poor" THEN 1 
-                ELSE 0 
-            END) as avg_evaluation
-        ')
-        ->first();
+        $statistics = HifzLog::where('student_id', $userId)
+            ->selectRaw('
+                COUNT(*) as total_sessions,
+                SUM(end_ayah - start_ayah + 1) as total_ayahs_memorized,
+                AVG(CASE 
+                    WHEN evaluation = "excellent" THEN 5 
+                    WHEN evaluation = "very_good" THEN 4 
+                    WHEN evaluation = "good" THEN 3 
+                    WHEN evaluation = "needs_improvement" THEN 2 
+                    WHEN evaluation = "poor" THEN 1 
+                    ELSE 0 
+                END) as avg_evaluation
+            ')
+            ->first();
+        Log::info(['statistics' => $statistics]);
+        Log::info(['total_ayahs_memorized' =>(int) $statistics->total_ayahs_memorized]);
+        // عدد الآيات التقريبي في القرآن هو 6236 آية
+        $totalQuranAyahs = 6236;
+        $memorizedAyahs = (int) $statistics->total_ayahs_memorized;
+        $quranCompletionPercentage = ($memorizedAyahs / $totalQuranAyahs) * 100;
 
-    // Calculate total ayahs manually if needed, or simply return the raw counts
-    // for the frontend to handle specific Sura logic.
-    return response()->json([
-        'total_sessions' => $statistics->count,
-        'average_evaluation' => round($statistics->avg_evaluation, 2),
-    ]);
-}
-
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'total_sessions' => (int) $statistics->total_sessions,
+                'total_ayahs_memorized' => (int)$memorizedAyahs,
+                'average_evaluation_out_of_5' =>round($statistics->avg_evaluation, 1),
+                'quran_completion_percentage' => round($quranCompletionPercentage, 2),
+            ]
+        ]);
+    }
     public function index(Request $request)
     {
         $logs = HifzLog::where('sheikh_id', auth()->user()->id)

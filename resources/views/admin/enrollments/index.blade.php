@@ -145,17 +145,23 @@
                                 <i class="fas fa-eye"></i>
                             </a>
                             @if($enrollment->status === 'pending')
-                            <button class="btn btn-sm btn-success approve-btn" 
-                                    data-id="{{ $enrollment->id }}"
-                                    title="قبول الطلب">
-                                <i class="fas fa-check"></i>
-                            </button>
-                            <button class="btn btn-sm btn-danger reject-btn" 
-                                    data-id="{{ $enrollment->id }}"
-                                    title="رفض الطلب">
-                                <i class="fas fa-times"></i>
-                            </button>
-                            @endif
+    {{-- زر القبول محاط بـ Form لإرسال الطلب --}}
+    <form action="{{ route('admin.enrollments.approve', $enrollment) }}" method="POST" style="display:inline-block;">
+        @csrf
+        @method('Post') 
+        <button type="submit" class="btn btn-sm btn-success" 
+                title="قبول الطلب" 
+                onclick="return confirm('هل أنت متأكد من قبول هذا الطلب؟')">
+            <i class="fas fa-check"></i>
+        </button>
+    </form>
+
+    <button class="btn btn-sm btn-danger reject-btn" 
+            data-id="{{ $enrollment->id }}"
+            title="رفض الطلب">
+        <i class="fas fa-times"></i>
+    </button>
+@endif
                             <form action="{{ route('admin.enrollments.destroy', $enrollment) }}" method="POST" style="display:inline-block;">
                                 @csrf
                                 @method('DELETE')

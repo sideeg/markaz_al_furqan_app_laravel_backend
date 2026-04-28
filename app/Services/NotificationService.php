@@ -271,77 +271,101 @@ class NotificationService
         );
     }
 
-    public function notifyCourseEnded(int $courseId, string $courseName): Notification
+    public function notifyNewCourse(int $courseId, string $courseName): Notification
     {
         return $this->createAndSendNotification(
-            1, 'انتهت الدورة',
-            "الدورة {$courseName} قد انتهت. شكراً لمشاركتك!",
-            'course_end', 'students',
+            1, ' دورة جديدة',
+            "بشري سعيدة دورة {$courseName}الان تم الاعلان عنها ومتاحه للتسجيل",
+            'custom_broadcast', 'both',
             ['course_id' => $courseId, 'course_name' => $courseName]
         );
     }
 
     /**
-     * Notify students and sheikhs that a course has been completed.
-     */
-    public function notifyCourseCompleted(Course $course)
-    {
-        // 1. Gather all Approved Student IDs
-        $studentIds = $course->approvedStudents()->pluck('users.id')->toArray();
+ * Notify students and sheikhs that a course has been completed.
+ */
+public function notifyCourseCompleted(Course $course)
+{
+    // 1. جلب معرفات الطلاب المقبولين فقط
+    $studentIds = $course->approvedStudents()->pluck('users.id')->toArray();
 
-        // 2. Gather all Sheikh IDs from the course groups
-        $sheikhIds = $course->groups()
-            ->whereNotNull('sheikh_id')
-            ->pluck('sheikh_id')
-            ->unique()
-            ->toArray();
+    // 2. جلب معرفات المشايخ المرتبطين بالمجموعات في هذه الدورة
+    $sheikhIds = $course->groups()
+        ->whereNotNull('sheikh_id')
+        ->pluck('sheikh_id')
+        ->unique()
+        ->toArray();
 
-        // Combine and remove duplicates
-        $targetUserIds = array_unique(array_merge($studentIds, $sheikhIds));
+    DB::transaction(function () use ($course, $studentIds, $sheikhIds) {
+        $type = 'course_end';
+        $createdBy = auth()->id() ?? 1;
+        $commonData = [
+            'course_id' => (string) $course->id,
+            'course_name' => $course->name,
+        ];
 
-        if (empty($targetUserIds)) {
-            return; // No one to notify
+        // --- أولاً: إرسال إشعارات الطلاب ---
+        if (!empty($studentIds)) {
+            $studentTitle = 'انتهاء الدورة';
+            $studentMessage = "تم بحمد الله الانتهاء من دورة: {$course->name}. نسأل الله أن ينفعكم بما تعلمتم.";
+
+            $this->sendNotificationProcess(
+                $studentIds, 
+                $studentTitle, 
+                $studentMessage, 
+                $type, 
+                $commonData, 
+                $createdBy
+            );
         }
 
-        DB::transaction(function () use ($course, $targetUserIds) {
-            $type = 'course_end';
-            $title = 'انتهاء الدورة'; // "Course Completed"
-            $message = "تم بحمد الله الانتهاء من دورة: {$course->name}. نسأل الله أن ينفعكم بما تعلمتم.";
+        // --- ثانياً: إرسال إشعارات المشايخ ---
+        if (!empty($sheikhIds)) {
+            $sheikhTitle = 'إتمام مهمة تعليمية';
+            $sheikhMessage = "تم بحمد الله الانتهاء من دورة: {$course->name}. تقبل الله جهدكم وجعلكم من أهل القرآن الذين هم أهله وخاصته.";
 
-            $data = [
-                'course_id' => (string) $course->id,
-                'course_name' => $course->name,
-                // The service architecture merges 'type' => 'course_end' automatically,
-                // but we can pass it here if your implementation requires it.
-            ];
-
-            // Create notification record in database
-            $notification = Notification::create([
-                'title' => $title,
-                'message' => $message,
-                'type' => $type,
-                'target' => 'individual', // Direct to specific user IDs
-                'data' => $data,
-                // Using auth()->id() or fallback to 1 (System Admin) as noted in your known bugs
-                'created_by' => auth()->id() ?? 1, 
-                'sent_at' => now(),
-            ]);
-
-            // Create the pivot records for Unread Counts (user_notifications table)
-            $notification->recipients()->attach(
-                collect($targetUserIds)->mapWithKeys(function ($id) {
-                    return [$id => ['is_read' => false]];
-                })->toArray()
+            $this->sendNotificationProcess(
+                $sheikhIds, 
+                $sheikhTitle, 
+                $sheikhMessage, 
+                $type, 
+                $commonData, 
+                $createdBy
             );
+        }
+    });
+}
 
-            // Dispatch job to Queue
-            PushFcmNotification::dispatch(
-                $targetUserIds, 
-                $title, 
-                $message, 
-                array_merge(['type' => $type], $data)
-            );
-        });
-    }
+/**
+ * وظيفة مساعدة لإتمام عملية التخزين والإرسال (لتجنب تكرار الكود)
+ */
+private function sendNotificationProcess($userIds, $title, $message, $type, $data, $createdBy)
+{
+    // إنشاء سجل الإشعار في قاعدة البيانات
+    $notification = Notification::create([
+        'title' => $title,
+        'message' => $message,
+        'type' => $type,
+        'target' => 'individual',
+        'data' => $data,
+        'created_by' => $createdBy,
+        'sent_at' => now(),
+    ]);
+
+    // ربط المستخدمين بالإشعار (للعدّاد وللقراءة)
+    $notification->recipients()->attach(
+        collect($userIds)->mapWithKeys(function ($id) {
+            return [$id => ['is_read' => false]];
+        })->toArray()
+    );
+
+    // إرسال عبر FCM (Firebase)
+    PushFcmNotification::dispatch(
+        $userIds, 
+        $title, 
+        $message, 
+        array_merge(['type' => $type], $data)
+    );
+}
 
 }

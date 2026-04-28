@@ -71,6 +71,17 @@ class Course extends Model
     const TYPE_OPEN = 'open';
     const TYPE_CLOSED = 'closed';
 
+    
+ /**
+     * Get course image URL.
+     */
+    public function getImageUrlAttribute(): ?string
+    {
+        if ($this->image_path) {
+            return asset('storage/' . $this->image_path);
+        }
+        return null;
+    }
     /**
  * Mark the course as completed and update related enrollments.
  */
@@ -204,16 +215,7 @@ public function markAsCompleted(): void
         };
     }
 
-    /**
-     * Get course image URL.
-     */
-    public function getImageUrlAttribute(): ?string
-    {
-        if ($this->image_path) {
-            return asset('storage/' . $this->image_path);
-        }
-        return null;
-    }
+   
 
     /**
      * Get enrollment percentage.

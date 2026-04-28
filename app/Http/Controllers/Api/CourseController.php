@@ -13,6 +13,7 @@ use App\Services\CourseService;
 
 class CourseController extends Controller
 {
+    private const minimum_required_version = '3.0.0';
     protected CourseService $courseService;
 
     public function __construct(CourseService $courseService)
@@ -35,7 +36,8 @@ class CourseController extends Controller
             ]);
 
             $query = Course::with(['mosque', 'creator'])
-                          ->active()
+                          ->where('is_active', true)
+                 ->orWhere('is_completed', true)
                           ->latest();
 
             // Apply filters
@@ -61,10 +63,11 @@ class CourseController extends Controller
                     return $course;
                 });
             }
-            
+            Log::info($courses->items());
             return response()->json([
                 'success' => true,
                 'data' => $courses->items(),
+                'minimum_required_version' => self::minimum_required_version,
                 'meta' => [
                     'pagination' => [
                         'current_page' => $courses->currentPage(),

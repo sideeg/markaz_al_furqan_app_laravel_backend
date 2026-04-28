@@ -21,6 +21,7 @@ class Group extends Model
         'description',
         'max_students',
         'status',
+        'created_by',
     ];
 
     // ─────────────────────────────────────────────────────────────

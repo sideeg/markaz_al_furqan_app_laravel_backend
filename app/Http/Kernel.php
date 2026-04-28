@@ -97,7 +97,7 @@ class Kernel extends HttpKernel
  
                 foreach ($coursesEndingToday as $course) {
                     // Notify all enrolled students
-                    $notificationService->notifyCourseEnded($course->id, $course->name);
+                    $notificationService->notifyCourseCompleted($course->id);
  
                     // Mark course as completed/done
                     $course->update(['status' => 'completed']);

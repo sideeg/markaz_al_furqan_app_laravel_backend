@@ -94,7 +94,7 @@ class SheikhController extends Controller
                   ->get();
     
    
-
+    
     if ($groups->isEmpty()) {
         return response()->json([
             'success' => false,
@@ -110,16 +110,17 @@ class SheikhController extends Controller
 
     foreach ($groups as $group) {
         $course = $group->course;
-        
+        Log::info($course);
         // تجنب تكرار الدورات
         if (!in_array($course->id, $processedCourses)) {
+            Log::info($course->id);
             $processedCourses[] = $course->id;
             
             // حساب عدد المجموعات للشيخ في هذه الدورة
             $groupsCount = Group::where('course_id', $course->id)
                               ->where('sheikh_id', auth()->id())
                               ->count();
-            
+            Log::info($groupsCount);
 
             $coursesData[] = [
                 'id' => $course->id,
@@ -149,7 +150,7 @@ class SheikhController extends Controller
             ];
         }
     }
-
+    Log::info($coursesData);
     return response()->json([
         'success' => true,
         'data' => $coursesData,
@@ -311,7 +312,7 @@ public function myStudents()
 
     public function updateProfile(Request $request)
     {
-        
+        Log::info('Request Data: ' . json_encode($request->all()));
         $user = auth()->user();
         // Handle password update separately
         if ($request->has('current_password')) {
@@ -345,6 +346,7 @@ public function myStudents()
             'email' => 'required|email|max:255|unique:users,email,' . $user->id,
             'phone' => 'nullable|string|max:20',
             'national_id' => 'nullable|string|max:20',
+            'nationality' => 'nullable|string|max:100',
             'qiraat' => 'nullable|string|max:50',
             'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
@@ -389,6 +391,7 @@ public function myStudents()
             'email' => $user->email,
             'phone' => $user->phone,
             'national_id' => $user->national_id,
+            'nationality' => $user->nationality,
             'qiraat' => $user->qiraat,
             'profile_image' => $user->profile_image_url,
             'role' => $user->role,

@@ -15,12 +15,13 @@ use App\Models\DeviceToken;
 use Illuminate\Validation\Rule;
 class AuthController extends Controller
 {
+   const  minimum_required_version = '3.0.0';
     /**
      * Register a new user.
      */
     public function register(Request $request): JsonResponse
     {
-        
+         
         try {
             $user = User::create([
                 'name' => $request->name,
@@ -44,6 +45,7 @@ class AuthController extends Controller
                 'data' => [
                     'user' => $this->formatUserData($user),
                     'token' => $token,
+                    'minimum_required_version' => self::minimum_required_version
                 ],
             ], 201);
 
@@ -52,6 +54,7 @@ class AuthController extends Controller
                 'success' => false,
                 'message' => 'حدث خطأ أثناء إنشاء الحساب',
                 'error' => $e->getMessage(),
+                
             ], 500);
         }
     }
@@ -88,6 +91,7 @@ class AuthController extends Controller
                 'data' => [
                     'user' => $this->formatUserData($user),
                     'token' => $token,
+                    'minimum_required_version' => self::minimum_required_version
                 ],
             ]);
 
@@ -117,6 +121,7 @@ class AuthController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'تم تسجيل الخروج بنجاح',
+                'minimum_required_version' => self::minimum_required_version, 
             ]);
 
         } catch (\Exception $e) {
