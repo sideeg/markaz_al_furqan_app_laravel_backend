@@ -161,6 +161,22 @@ public function markAsCompleted(): void
     }
 
     /**
+     * Get rejected students.
+     */
+    public function rejectedStudents()
+    {
+        return $this->students()->wherePivot('status', 'rejected');
+    }
+
+    /**
+     * Get completed students.
+     */
+    public function completedStudents()
+    {
+        return $this->students()->wherePivot('status', 'completed');
+    }
+
+    /**
      * Get assigned sheikhs.
      */
     public function sheikhs()

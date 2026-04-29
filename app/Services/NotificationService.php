@@ -287,15 +287,15 @@ class NotificationService
 public function notifyCourseCompleted(Course $course)
 {
     // 1. جلب معرفات الطلاب المقبولين فقط
-    $studentIds = $course->approvedStudents()->pluck('users.id')->toArray();
-
+    $studentIds = $course->completedStudents()->pluck('users.id')->toArray();
+    Log::info("Course completed: {$course->name} — studentIds: " . implode(', ', $studentIds));
     // 2. جلب معرفات المشايخ المرتبطين بالمجموعات في هذه الدورة
     $sheikhIds = $course->groups()
         ->whereNotNull('sheikh_id')
         ->pluck('sheikh_id')
         ->unique()
         ->toArray();
-
+    Log::info("Course completed: {$course->name} — studentIds: " . implode(', ', $studentIds) . ", sheikhIds: " . implode(', ', $sheikhIds));
     DB::transaction(function () use ($course, $studentIds, $sheikhIds) {
         $type = 'course_end';
         $createdBy = auth()->id() ?? 1;
@@ -318,7 +318,7 @@ public function notifyCourseCompleted(Course $course)
                 $createdBy
             );
         }
-
+        Log::info("Course completed: {$course->name} — studentIds: " . implode(', ', $studentIds) . ", sheikhIds: " . implode(', ', $sheikhIds));
         // --- ثانياً: إرسال إشعارات المشايخ ---
         if (!empty($sheikhIds)) {
             $sheikhTitle = 'إتمام مهمة تعليمية';

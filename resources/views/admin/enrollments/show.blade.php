@@ -206,7 +206,7 @@
                                     <tr>
                                         
                                         <td>{{ $log->date }}</td>
-                                        <td>{{ $log->start_sura }}</td>
+                                        <td>{{ $log->start_surah }}</td>
                                         <td>{{ $log->start_ayah }} - {{ $log->end_ayah }}</td>
                                         <td>
                                             <span class="badge bg-info">{{ $log->evaluation }}</span>
@@ -243,7 +243,7 @@
                                     @foreach($enrollment->student->reviewLogs as $log)
                                     <tr>
                                         <td>{{ $log->date }}</td>
-                                        <td>{{ $log->start_sura }}</td>
+                                        <td>{{ $log->start_surah }}</td>
                                         <td>{{ $log->start_ayah }} - {{ $log->end_ayah }}</td>
                                         <td>
                                             <span class="badge bg-info">{{ $log->evaluation }}</span>
@@ -372,20 +372,32 @@
 
 @section('styles')
 <style>
-    .nav-tabs .nav-link {
-        color: #495057;
-        font-weight: 600;
-        border: none;
-        border-bottom: 3px solid transparent;
-        padding: 10px 15px;
+   /* 1. Target the exact path to the button to override stubborn theme CSS */
+    .admin-card .card-body .nav-tabs .nav-item button.nav-link {
+        color: #495057 !important; /* Force text to be dark gray */
+        background-color: #f8f9fa !important; /* Give tabs a light gray background by default */
+        font-weight: 600 !important;
+        border: 1px solid #dee2e6 !important;
+        border-bottom: 3px solid transparent !important;
+        padding: 10px 15px !important;
+        margin-left: 5px !important; /* Space between tabs (left because Arabic RTL) */
+        border-radius: 5px 5px 0 0 !important;
     }
-    
-    .nav-tabs .nav-link.active {
-        color: var(--primary);
-        background: none;
-        border-bottom: 3px solid var(--primary);
+
+    /* 2. Hover state */
+    .admin-card .card-body .nav-tabs .nav-item button.nav-link:hover {
+        background-color: #e9ecef !important; /* Slightly darker gray on hover */
+        color: #0d6efd !important;
     }
-    
+
+    /* 3. Active tab state */
+    .admin-card .card-body .nav-tabs .nav-item button.nav-link.active {
+        color: #0d6efd !important; /* Primary blue text */
+        background-color: #ffffff !important; /* White background for active tab */
+        border-color: #dee2e6 #dee2e6 transparent !important; /* Borders match the container */
+        border-bottom: 3px solid #0d6efd !important; /* Thick blue bottom line */
+    }
+
     .progress-bar {
         font-weight: 600;
         font-size: 1rem;

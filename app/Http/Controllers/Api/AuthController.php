@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use App\Models\DeviceToken;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Validator;
+
 class AuthController extends Controller
 {
    const  minimum_required_version = '3.0.0';
@@ -20,7 +22,42 @@ class AuthController extends Controller
      * Register a new user.
      */
     public function register(Request $request): JsonResponse
-    {
+    {   
+
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'phone' => 'nullable|string|max:20',
+            'national_id' => 'nullable|string|max:20',
+            'gender' => 'nullable|string|max:50',
+            'qiraat' => 'nullable|string|max:50',
+            'profile_image' => 'nullable|image|max:2048',
+            'nationality' => ['nullable', 'string', Rule::in(config('nationalities'))],
+            'password' => 'required|string|min:6|confirmed',
+            'is_active' => 'nullable|boolean',
+        ], [], [
+            'name' => 'الاسم يجب ان يكون نص ليس اطول من 255 حرف',
+            'email' => 'البريد الإلكتروني يجب ان يكون عنوان بريد إلكتروني صالح',
+            'phone' => 'رقم الهاتف يجب ان يكون نص ليس اطول من 20 حرف',
+            'national_id' => 'الرقم القومي يجب ان يكون نص ليس اطول من 20 حرف',
+            'nationality' => 'الرجاء اختيار الجنسية',
+            'qiraat' => 'الرجاء اختيار القراءة',
+            'profile_image' => 'صورة الملف الشخصي يجب ان تكون صورة',
+            'password' => 'يجب ان تكون  علي الاقل ستة حروف و يجب ان تتكون من حروف وكلمات مرور',
+            'is_active' => 'الحالة',
+        ]);
+
+        if ($validator->fails()) {
+             // Extract first error message for user-friendly display
+    $errors = $validator->errors();
+    $firstError = $errors->first(); // Gets the first error message
+    
+    return response()->json([
+        'success' => false,
+        'message' => 'حدث خطأ أثناء إنشاء الحساب: ' . $firstError, // 👈 Include specific error in message
+        'errors' => $errors, // Keep full object for frontend parsing
+    ], 422);
+        }
          
         try {
             $user = User::create([
@@ -33,12 +70,12 @@ class AuthController extends Controller
                 'qiraat' => $request->qiraat,
                 'gender'                => $request->gender,
             ]);
+
             // Assign default role
             $user->assignRole('student');
 
             // Create token
             $token = $user->createToken('auth_token')->plainTextToken;
-
             return response()->json([
                 'success' => true,
                 'message' => 'تم إنشاء الحساب بنجاح',
@@ -50,6 +87,7 @@ class AuthController extends Controller
             ], 201);
 
         } catch (\Exception $e) {
+            Log::error($e);
             return response()->json([
                 'success' => false,
                 'message' => 'حدث خطأ أثناء إنشاء الحساب',
@@ -65,33 +103,35 @@ class AuthController extends Controller
     public function login(Request $request): JsonResponse
     {
         try {
+            
             $user = User::where('email', $request->email)->first();
             if (!$user || !Hash::check($request->password, $user->password)) {
                 throw ValidationException::withMessages([
                     'email' => ['البريد الإلكتروني أو كلمة المرور غير صحيحة'],
                 ]);
             }
-
+            
             // Check if user is active
             if (!$user->is_active) {
                 return response()->json([
                     'success' => false,
                     'message' => 'حسابك غير مفعل. يرجى التواصل مع الإدارة',
                 ], 403);
-            }            
+            }
+                       
             // Revoke all existing tokens
             $user->tokens()->delete();
 
             // Create new token
             $token = $user->createToken('auth_token')->plainTextToken;
-
+            
             return response()->json([
                 'success' => true,
                 'message' => 'تم تسجيل الدخول بنجاح',
                 'data' => [
                     'user' => $this->formatUserData($user),
                     'token' => $token,
-                    'minimum_required_version' => self::minimum_required_version
+                    'minimum_required_version' => self::minimum_required_version,
                 ],
             ]);
 
