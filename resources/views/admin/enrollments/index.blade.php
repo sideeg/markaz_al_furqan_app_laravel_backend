@@ -146,15 +146,16 @@
                             </a>
                             @if($enrollment->status === 'pending')
     {{-- زر القبول محاط بـ Form لإرسال الطلب --}}
-    <form action="{{ route('admin.enrollments.approve', $enrollment) }}" method="POST" style="display:inline-block;">
-        @csrf
-        @method('Post') 
-        <button type="submit" class="btn btn-sm btn-success" 
-                title="قبول الطلب" 
-                onclick="return confirm('هل أنت متأكد من قبول هذا الطلب؟')">
-            <i class="fas fa-check"></i>
-        </button>
-    </form>
+    <!-- Inside your table loop -->
+<form action="{{ route('admin.enrollments.approve', array_merge(['enrollment' => $enrollment->id], request()->query())) }}" method="POST" style="display:inline-block;">
+    @csrf
+    @method('POST') 
+    <button type="submit" class="btn btn-sm btn-success" 
+            title="قبول الطلب" 
+            onclick="return confirm('هل أنت متأكد من قبول هذا الطلب؟')">
+        <i class="fas fa-check"></i>
+    </button>
+</form>
 
     <button class="btn btn-sm btn-danger reject-btn" 
             data-id="{{ $enrollment->id }}"
@@ -229,7 +230,8 @@
         $('.reject-btn').click(function() {
             const enrollmentId = $(this).data('id');
             const form = $('#rejectionForm');
-            form.attr('action', `/admin/admin/enrollments/${enrollmentId}/reject`);
+            const queryParams = window.location.search;
+            form.attr('action', `/admin/enrollments/${enrollmentId}/reject${queryParams}`);
             $('#rejectionModal').modal('show');
         });
     });

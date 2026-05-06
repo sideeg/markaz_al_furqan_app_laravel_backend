@@ -92,7 +92,7 @@ class EnrollmentController extends Controller
     /**
      * Approve an enrollment request.
      */
-    public function approve(Enrollment $enrollment)
+    public function approve(Request $request,Enrollment $enrollment)
     {
         // Check if course has available spots
         $course = $enrollment->course;
@@ -112,7 +112,7 @@ class EnrollmentController extends Controller
             $enrollment->course()->increment('current_students');
         });
 
-        return redirect()->route('admin.enrollments.index')
+        return redirect()->route('admin.enrollments.index', $request->query())
             ->with('success', 'تم قبول طلب التسجيل بنجاح');
     }
 
@@ -132,7 +132,7 @@ class EnrollmentController extends Controller
             'approved_by' => auth()->id(),
         ]);
 
-        return redirect()->route('admin.enrollments.index')
+        return redirect()->route('admin.enrollments.index', $request->query())
             ->with('success', 'تم رفض طلب التسجيل بنجاح');
     }
 
